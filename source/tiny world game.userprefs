@@ -1,0 +1,14 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\scripts\drag_controls.js">
+    <Files>
+      <File FileName="Assets\scripts\drag_controls.js" Line="270" Column="43" />
+      <File FileName="Assets\scripts\shrink_speed.js" Line="30" Column="17" />
+      <File FileName="Assets\scripts\person.js" Line="13" Column="21" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>

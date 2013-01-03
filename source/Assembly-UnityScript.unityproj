@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+	<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+	<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+	<ProductVersion>10.0.20506</ProductVersion>
+	<SchemaVersion>2.0</SchemaVersion>
+	<ProjectGuid>{772193DE-CC71-2CC0-A949-727A1E4DC4E0}</ProjectGuid>
+	<OutputType>Library</OutputType>
+	<AppDesignerFolder>Properties</AppDesignerFolder>
+	<RootNamespace></RootNamespace>
+	<AssemblyName>Assembly-UnityScript</AssemblyName>
+	<TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+	<FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+	<DebugSymbols>true</DebugSymbols>
+	<DebugType>full</DebugType>
+	<Optimize>false</Optimize>
+	<OutputPath>Temp\bin\Debug\</OutputPath>
+	<DefineConstants>DEBUG;TRACE;UNITY_3_5_6;UNITY_3_5;UNITY_EDITOR;ENABLE_PROFILER;UNITY_WEBPLAYER;ENABLE_GENERICS;ENABLE_DUCK_TYPING;ENABLE_TERRAIN;ENABLE_MOVIES;ENABLE_WEBCAM;ENABLE_MICROPHONE;ENABLE_NETWORK;ENABLE_CLOTH;ENABLE_WWW;ENABLE_SUBSTANCE</DefineConstants>
+	<ErrorReport>prompt</ErrorReport>
+	<WarningLevel>4</WarningLevel>
+	<NoWarn>0169</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+	<DebugType>pdbonly</DebugType>
+	<Optimize>true</Optimize>
+	<OutputPath>Temp\bin\Release\</OutputPath>
+	<DefineConstants>TRACE</DefineConstants>
+	<ErrorReport>prompt</ErrorReport>
+	<WarningLevel>4</WarningLevel>
+	<NoWarn>0169</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+	<Reference Include="System" />
+    <Reference Include="System.XML" />
+	<Reference Include="System.Core" />
+	<Reference Include="UnityEngine">
+	  <HintPath>C:/Program Files (x86)/Unity/Editor/Data/Managed/UnityEngine.dll</HintPath>
+	</Reference>
+	<Reference Include="UnityEditor">
+	  <HintPath>C:/Program Files (x86)/Unity/Editor/Data/Managed/UnityEditor.dll</HintPath>
+	</Reference>
+  </ItemGroup>
+  <ItemGroup>
+     <Compile Include="Assets\scripts\Asteroid Stuff\AsteroidController.js" />
+     <Compile Include="Assets\scripts\Asteroid Stuff\RedAsteroidController.js" />
+     <Compile Include="Assets\scripts\Asteroid Stuff\UnstableAsteroid.js" />
+     <Compile Include="Assets\scripts\Background Stuff\NebulaBackground.js" />
+     <Compile Include="Assets\scripts\Background Stuff\NebulaParentController.js" />
+     <Compile Include="Assets\scripts\Background Stuff\StarBackground.js" />
+     <Compile Include="Assets\scripts\Control Stuff\DragControlsPC.js" />
+     <Compile Include="Assets\scripts\Control Stuff\Joystick.js" />
+     <Compile Include="Assets\scripts\Effects\ExplosionParticleEffect.js" />
+     <Compile Include="Assets\scripts\Effects\TransitionStars.js" />
+     <Compile Include="Assets\scripts\Human Stuff\HumanPerson.js" />
+     <Compile Include="Assets\scripts\Human Stuff\HumanShip.js" />
+     <Compile Include="Assets\scripts\Key Stuff\KeyPiece.js" />
+     <Compile Include="Assets\scripts\Key Stuff\KeyPositions.js" />
+     <Compile Include="Assets\scripts\Key Stuff\KeyShowController.js" />
+     <Compile Include="Assets\scripts\Level Select Stuff\LevelColorator.js" />
+     <Compile Include="Assets\scripts\Level Select Stuff\LevelProgress.js" />
+     <Compile Include="Assets\scripts\Level Select Stuff\LevelSelectObject.js" />
+     <Compile Include="Assets\scripts\Level Select Stuff\LevelSelectPlanetController.js" />
+     <Compile Include="Assets\scripts\Overhead Stuff\FPSDraw.js" />
+     <Compile Include="Assets\scripts\Overhead Stuff\PausePlane.js" />
+     <Compile Include="Assets\scripts\Overhead Stuff\Platform_type.js" />
+     <Compile Include="Assets\scripts\Overhead Stuff\SaveStating.js" />
+     <Compile Include="Assets\scripts\Overhead Stuff\XmlHandler.js" />
+     <Compile Include="Assets\scripts\Planet Stuff\PlanetController.js" />
+     <Compile Include="Assets\scripts\Planet Stuff\PlanetSearcher.js" />
+     <Compile Include="Assets\scripts\Planet Stuff\planetLifeIndicator.js" />
+     <Compile Include="Assets\scripts\Sun Stuff\ShrinkCode.js" />
+     <Compile Include="Assets\scripts\Sun Stuff\SunRadii.js" />
+     <Compile Include="Assets\scripts\Tutorial Stuff\EyesTutorialPlane.js" />
+     <Compile Include="Assets\scripts\Tutorial Stuff\FlyingPeople.js" />
+     <Compile Include="Assets\scripts\Tutorial Stuff\TouchTutorial.js" />
+     <Compile Include="Assets\scripts\UI Stuff\ProximityIndicator.js" />
+     <Compile Include="Assets\scripts\UI Stuff\TextTypeEffect.js" />
+     <None Include="Assets\shaders\PC\RampRim.shader" />
+     <None Include="Assets\shaders\PC\CustFontShader.shader" />
+     <None Include="Assets\shaders\PC\RampRimSpecBump.shader" />
+     <None Include="Assets\shaders\PC\PlanetRingIndicator.shader" />
+     <None Include="Assets\shaders\PC\RampRimBump.shader" />
+     <None Include="Assets\shaders\PC\shader.shader" />
+     <None Include="Assets\shaders\PC\CustSelfIlluminSpec.shader" />
+     <None Include="Assets\shaders\PC\RampRimSpec.shader" />
+     <None Include="Assets\lProgress.xml" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+	   Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  
+</Project>
