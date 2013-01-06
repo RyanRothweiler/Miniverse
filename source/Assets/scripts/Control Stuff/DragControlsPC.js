@@ -91,7 +91,8 @@ public var WorldZDepth : int; //depth of the plane which all interactable object
 public var worldDist : float; //distance which the worlds must stay to the sun
 public var DragRate : float; //speed which player moves the world around
 public var CameraPositionSpeed : float; // the speed which the camera moves in during the level transitions
-public var CameraScaleSpeed : float; //the speed which the world scales up and down in the level transitions
+public var CameraScaleSpeed : float; //the speed which the world scales up and down in the level transitions 
+public var LevelSelectDragRate : float; //rate at which the level select tags are drug 
 
 public var WorldDraggingInverted : boolean; //if world dragging is inverted
 public var CanMoveCameraHorizontal : boolean; //if the player can move the camera horizontally
@@ -196,7 +197,7 @@ private var dummyVector3 : Vector3;
 private var dummyVector2 : Vector2;
 //private var PrevLevelNum : GameObject; //when moving back to the level select screen, this holds the level num of the level which the player came from
 private static var PrevLevelLoc : Vector3; //the previous level tag's location
-private var LevelOffset : Vector3;
+private var LevelOffset : Vector3; 
 
 //touch control variables
 public var Touch1StartPos = Vector2(0,0); //the start position of a touch
@@ -307,9 +308,14 @@ function Start ()
 	}
 	else
 	{
-		print("PC");
-		PlatformPC = true;
-		PlatformIOS = false;
+		print("IOS");
+		DragRate = 0.02;
+		WorldDraggingInverted = false;
+		PlatformIOS = true;
+		PlatformPC = false;
+//		print("PC");
+//		PlatformPC = true;
+//		PlatformIOS = false;
 	}
 	
 }
@@ -1280,7 +1286,7 @@ function LevelSelect()
 			Touching1 = true;
 			Touch1EndPos = touch.position;
 			
-			//limit to one touch
+			//check the first touch
 			if (touch.fingerId == 0)
 			{
 				//get start pos
@@ -1291,28 +1297,31 @@ function LevelSelect()
 					Touch1Start = false;
 					Touch1Move = false;
 				}
-				
 				//check if a tap, if not then a drag
 				if ((Touch1StartPos.x + TouchTapBounds.x > Touch1EndPos.x) && (Touch1StartPos.x - TouchTapBounds.x < Touch1EndPos.x) && (Touch1StartPos.y + TouchTapBounds.y > Touch1EndPos.y) && (Touch1StartPos.y - TouchTapBounds.y < Touch1EndPos.y))
 					Touch1Tap = true;
-				else if (Touch1StartPos.y < 400) //if a move and on the bottom half of the screen
+				else if (Touch1StartPos.y < 250) //if a move and on the bottom half of the screen
 				{						
 					Touch1Move = true;
 					Touch1Tap = false;
 					
-					MovementControllerOldPos = LevelSelectMovementController.transform.position;
+					MovementControllerOldPos = LevelOffset;
 					
 					//limit movement 
-					if (LevelSelectMovementController.transform.position.x + (touch.deltaPosition.x * Time.deltaTime) / 4 < 0 ) //left side
-						LevelSelectMovementController.transform.position.x += (touch.deltaPosition.x * Time.deltaTime) / 4;
-					else
-						LevelSelectMovementController.transform.position.x = 0;
-					if (LevelSelectMovementController.transform.position.x + (touch.deltaPosition.x * Time.deltaTime) / 4 > -120)//right side
-						LevelSelectMovementController.transform.position.x += (touch.deltaPosition.x * Time.deltaTime) / 4;
-					else
-						LevelSelectMovementController.transform.position.x = -120;
+					if (LevelSelectMovementController.transform.position.x + (touch.deltaPosition.x * Time.deltaTime) * LevelSelectDragRate < 0 ){ //left side
+						LevelOffset.x += (touch.deltaPosition.x * Time.deltaTime) * LevelSelectDragRate;
+					}
+					else {
+						LevelOffset.x += 0;
+					}
+					if (LevelSelectMovementController.transform.position.x + (touch.deltaPosition.x * Time.deltaTime) * LevelSelectDragRate > -120){ //right side
+						LevelOffset.x += (touch.deltaPosition.x * Time.deltaTime) * LevelSelectDragRate;
+					}
+					else {
+						LevelOffset.x += -120;
+					}
 						
-					Movement1Delta = MovementControllerOldPos - LevelSelectMovementController.transform.position;
+					Movement1Delta = MovementControllerOldPos - LevelOffset;
 				}			
 			}
 		}
@@ -1327,26 +1336,27 @@ function LevelSelect()
 			if (Touch1Move)
 			{				
 				//limit movement
-				if (LevelSelectMovementController.transform.position.x - Movement1Delta.x < 0 ) //left side
-					LevelSelectMovementController.transform.position.x -= (Movement1Delta.x);
+				if (LevelOffset.x - Movement1Delta.x < 0 ){ //left side
+					LevelOffset.x -= (Movement1Delta.x);
+				}
 				else
 				{
 					//end the flick
 					print("limiting and ending the flick");
-					LevelSelectMovementController.transform.position.x = 0;
+					LevelOffset.x = 0;
 					
 					Touch1StartPos = Vector2(0,0);
 					Touch1EndPos = Vector2(1000,1000);		
 					Movement1Delta.x = 0;
 					Touch1Move = false;
 				}
-				if (LevelSelectMovementController.transform.position.x - Movement1Delta.x > -120) //right side
-					LevelSelectMovementController.transform.position.x -= (Movement1Delta.x);
+				if (LevelOffset.x - Movement1Delta.x > -120) //right side
+					LevelOffset.x -= (Movement1Delta.x);
 				else
 				{
 					//end the flick
 					print("limiting and ending the flick");
-					LevelSelectMovementController.transform.position.x = -120;
+					LevelOffset.x = -120;
 					
 					Touch1StartPos = Vector2(0,0);
 					Touch1EndPos = Vector2(1000,1000);		

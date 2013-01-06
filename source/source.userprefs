@@ -1,18 +1,8 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\scripts\Control Stuff\DragControlsPC.js">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/scripts/Control Stuff/DragControlsPC.js">
     <Files>
-      <File FileName="Assets\scripts\Human Stuff\HumanShip.js" Line="15" Column="1" />
-      <File FileName="Assets\scripts\Asteroid Stuff\AsteroidController.js" Line="29" Column="21" />
-      <File FileName="Assets\scripts\Planet Stuff\PlanetSearcher.js" Line="226" Column="84" />
-      <File FileName="Assets\scripts\Key Stuff\KeyPiece.js" Line="104" Column="4" />
-      <File FileName="Assets\scripts\Tutorial Stuff\TouchTutorial.js" Line="65" Column="1" />
-      <File FileName="Assets\scripts\UI Stuff\ProximityIndicator.js" Line="19" Column="1" />
-      <File FileName="Assets\scripts\Control Stuff\DragControlsPC.js" Line="903" Column="1" />
-      <File FileName="Assets\shaders\PC\PlanetRingIndicator.shader" Line="1" Column="1" />
-      <File FileName="Assets\scripts\Planet Stuff\planetLifeIndicator.js" Line="36" Column="1" />
-      <File FileName="Assets\scripts\UI Stuff\TextTypeEffect.js" Line="23" Column="20" />
-      <File FileName="Assets\shaders\PC\RampRimSpecBump.shader" Line="62" Column="22" />
+      <File FileName="Assets/scripts/Control Stuff/DragControlsPC.js" Line="1308" Column="44" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
