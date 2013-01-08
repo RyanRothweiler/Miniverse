@@ -87,6 +87,7 @@ public var peopleSaved = 0; //number of people saved
 public var peopleGoal : int; //win condition of the level
 public var peopleAlive : int; //People # Monitor
 public var WorldZDepth : int; //depth of the plane which all interactable object sit on
+public static var previousLevel = 0; //the level num which the player was in last
 
 public var worldDist : float; //distance which the worlds must stay to the sun
 public var DragRate : float; //speed which player moves the world around
@@ -248,6 +249,7 @@ function OnLevelWasLoaded()
 
 function Start () 
 {
+	//initialize things
 	peopleDragging = false;
 	nextLevel = false;
 	halt = true;
@@ -267,35 +269,46 @@ function Start ()
 		isMenu = false;
 	}
 	
+	//level select instant zoom
+	if (isLevelSelect) {
+		transform.position.z = camZStopPos;
+	}
+	
 	objects = GameObject.FindObjectsOfType(GameObject);
 	worldObjects = GameObject.FindGameObjectsWithTag("world");
 	sunObjects = GameObject.FindGameObjectsWithTag("sun");
 	personObjects = GameObject.FindGameObjectsWithTag("humanPerson");
 
 	//This is kinda important, it keeps everything properly parented so this sorting step is necessary
-	for (i = 0; i < objects.length; i++)
-	{	
-		//if tagged as a world
-		if (objects[i].tag == "world")
-			objects[i].transform.parent = SceneScaleController.transform;
-		//if tagged as a sun
-		if (objects[i].tag == "sun")
-			objects[i].transform.parent = SceneScaleController.transform;
-		//if tagged as ui
-		if (objects[i].tag == "ui")
-			objects[i].transform.parent = SceneScaleController.transform;
-		//if an asteroid
-		if (objects[i].name == "Asteroid")
-			objects[i].transform.parent = SceneScaleController.transform;
-		//red asteroids
-//		if (objects[i].name == "RedAsteroid")
-//			objects[i].transform.parent = SceneScaleController.transform;
+	if (!isLevelSelect)
+	{
+		for (i = 0; i < objects.length; i++)
+		{	
+			//if tagged as a world
+			if (objects[i].tag == "world")
+				objects[i].transform.parent = SceneScaleController.transform;
+			//if tagged as a sun
+			if (objects[i].tag == "sun")
+				objects[i].transform.parent = SceneScaleController.transform;
+			//if tagged as ui
+			if (objects[i].tag == "ui")
+				objects[i].transform.parent = SceneScaleController.transform;
+			//if an asteroid
+			if (objects[i].name == "Asteroid")
+				objects[i].transform.parent = SceneScaleController.transform;
+			//red asteroids
+	//		if (objects[i].name == "RedAsteroid")
+	//			objects[i].transform.parent = SceneScaleController.transform;
+		}
 	}
 
 	peopleGoal = personObjects.length;
 	peopleAlive = personObjects.length;
+	
 	//scale down scene
-	SceneScaleController.transform.localScale = Vector3(0,0,0);
+	if (!isLevelSelect) {
+		SceneScaleController.transform.localScale = Vector3(0,0,0);
+	}
 	
 	//set platform and platform specific settings
 	if (Application.platform == RuntimePlatform.IPhonePlayer)
@@ -308,14 +321,14 @@ function Start ()
 	}
 	else
 	{
-		print("IOS");
-		DragRate = 0.02;
-		WorldDraggingInverted = false;
-		PlatformIOS = true;
-		PlatformPC = false;
-//		print("PC");
-//		PlatformPC = true;
-//		PlatformIOS = false;
+//		print("IOS");
+//		DragRate = 0.02;
+//		WorldDraggingInverted = false;
+//		PlatformIOS = true;
+//		PlatformPC = false;
+		print("PC");
+		PlatformPC = true;
+		PlatformIOS = false;
 	}
 	
 }
@@ -489,15 +502,17 @@ function Update ()
 					{	
 						//if mouse didn't move
 						if (mousePos == Input.mousePosition)
-						{						
+						{		
 							MovePeople(true);
 						}
 					}
-					if (objectInfo.collider.name == "HumanPlanet" && selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.name != selectedWorld.collider.name) //if selected a human planet
+					//print(selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.name);
+					if (objectInfo.collider.name == "HumanPlanet" && selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet != selectedWorld.collider.gameObject) //if selected a human planet
 					{
 						//if mouse didn't move
 						if (mousePos == Input.mousePosition)
-						{					
+						{
+							print("moving");	
 							MovePeople(false);
 						}
 					}
@@ -946,12 +961,11 @@ function Update ()
 	
 	//if the level has been beat
 	if (nextLevel)
-	{
-		isPlayOne = true;
-		ZoomIn();
-		
+	{		
 		if(inGame && !fromLSelect)
 		{
+			isPlayOne = true;
+			ZoomIn();
 			if (transform.position.z >= WorldZDepth + 10)
 			{
 				StarStreakMat.SetColor("_TintColor",Color(StarStreakMat.GetColor("_TintColor").r, StarStreakMat.GetColor("_TintColor").g, StarStreakMat.GetColor("_TintColor").b, 0));
@@ -962,7 +976,8 @@ function Update ()
 		}
 		else
 		{
-			if (transform.position.z >= WorldZDepth + 10)
+			Camera.main.GetComponent(LevelNumberTypeEffect).SendMessage("TypeAway");
+			if (Camera.main.GetComponent(LevelNumberTypeEffect).NextLevelReady)
 			{
 				StarStreakMat.SetColor("_TintColor",Color(StarStreakMat.GetColor("_TintColor").r, StarStreakMat.GetColor("_TintColor").g, StarStreakMat.GetColor("_TintColor").b, 0));
 				Application.LoadLevel(Level);
@@ -1229,7 +1244,7 @@ function MainMenu()
 	}
 }
 
-//Code for Level Select
+//Code for Level Select functionality
 function LevelSelect()
 {
 	halt = true;
@@ -1245,6 +1260,7 @@ function LevelSelect()
 				if (objectInfo.collider.tag == "LevelTag")
 				{
 					//Level is set to the collider's name and then loaded. See "nextLevel" code in update function.
+					previousLevel = int.Parse(objectInfo.collider.transform.Find("Num").GetComponent(TextMesh).text);
 					Level = objectInfo.collider.name;
 					PrevLevelLoc = LevelSelectMovementController.transform.position;
 					LevelOffset = Vector3.zero;
@@ -1263,13 +1279,6 @@ function LevelSelect()
 				}
 			}
 		}
-		
-		//for circular scrolling
-		//scrolling through the level select objects 
-//		if (Input.GetAxis("Mouse ScrollWheel"))
-//		{
-//			LevelSelectMovementController.transform.Rotate(Vector3(0,0,Input.GetAxis("Mouse ScrollWheel") * Time.deltaTime * 7000));
-//		}
 
 		//for horizontal scrolling
 		LevelOffset.x += Input.GetAxis("Mouse ScrollWheel") * Time.deltaTime * 1000;
@@ -1383,6 +1392,7 @@ function LevelSelect()
 				if(Physics.Raycast(Camera.main.WorldToScreenPoint(Vector3(Touch1StartPos.x,Touch1StartPos.y,Camera.main.transform.position.z)), Camera.main.ScreenToWorldPoint(Vector3(Touch1StartPos.x, Touch1StartPos.y, WorldZDepth - Camera.main.transform.position.z)), objectInfo))
 				{
 					//Level is set to the collider's name and then loaded. See "nextLevel" code in update function.
+					previousLevel = int.Parse(objectInfo.collider.transform.Find("Num").GetComponent(TextMesh).text);
 					Level = objectInfo.collider.name;
 					nextLevel = true;
 					isLevelSelect = false;

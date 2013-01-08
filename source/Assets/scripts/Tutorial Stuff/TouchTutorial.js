@@ -69,13 +69,13 @@ function Type(text : String) //an effect of typing in something
 	{
 		str = str.Substring(0, str.Length - 1);
 		GetComponent(TextMesh).text = str;
-		yield WaitForSeconds(0.05);
+		yield WaitForSeconds(0.01);
 	}
 	
 	for (i = 0; i < text.Length; i++)
 	{
 		str = str + text[i];
 		GetComponent(TextMesh).text = str;
-		yield WaitForSeconds(0.05);
+		yield WaitForSeconds(0.01);
 	}
 }
