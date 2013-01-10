@@ -1,11 +1,15 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\scripts\Level Select Stuff\LevelNumberTypeEffect.js">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\scripts\Human Stuff\HumanShip.js">
     <Files>
-      <File FileName="Assets\scripts\Level Select Stuff\LevelNumberTypeEffect.js" Line="188" Column="40" />
-      <File FileName="Assets\scripts\Control Stuff\DragControlsPC.js" Line="568" Column="66" />
-      <File FileName="Assets\scripts\Tutorial Stuff\TouchTutorial.js" Line="47" Column="5" />
-      <File FileName="Assets\scripts\Overhead Stuff\SaveStating.js" Line="38" Column="10" />
+      <File FileName="Assets\scripts\Human Stuff\HumanShip.js" Line="133" Column="60" />
+      <File FileName="Assets\scripts\Key Stuff\KeyPositions.js" Line="1" Column="1" />
+      <File FileName="Assets\scripts\Key Stuff\KeyPiece.js" Line="1" Column="1" />
+      <File FileName="Assets\scripts\Key Stuff\KeyShowController.js" Line="1" Column="1" />
+      <File FileName="Assets\scripts\Control Stuff\DragControlsPC.js" Line="1" Column="1" />
+      <File FileName="Assets\scripts\Tutorial Stuff\TouchTutorial.js" Line="1" Column="1" />
+      <File FileName="Assets\scripts\UI Stuff\ProximityIndicator.js" Line="1" Column="1" />
+      <File FileName="Assets\scripts\Planet Stuff\PlanetSearcher.js" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

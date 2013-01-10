@@ -175,7 +175,14 @@ function BeginSearch ()
 	    }
 	    
 	    //point selector at planet
-	    selectLine.transform.LookAt(nearestPlanet.transform,fVector);
+	    if(nearestPlanet.name == "humanShip")
+	    {
+	    	selectLine.transform.LookAt(nearestPlanet.transform.Find("humanship_3_MO").position,fVector);
+	    }
+	    else
+	    {
+	    	selectLine.transform.LookAt(nearestPlanet.transform,fVector);
+	    }
 	}
 	else
 	{

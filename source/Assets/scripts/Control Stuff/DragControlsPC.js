@@ -108,6 +108,7 @@ public var CanViewDrag : boolean; //if the player can drag the view around
 public var CameraViewPlanetPush : boolean; //if pushing a planet toward the edge of the screen then the camera moves
 public var Transitioning = false; //if the level is in transition or not
 public var LevelLost = false; //triggered by lose condition
+public var FlyAway = false; //flying the spaceship away to the next level
 
 public var Phase1 = false;
 public var Phase2 = false;
@@ -512,7 +513,6 @@ function Update ()
 						//if mouse didn't move
 						if (mousePos == Input.mousePosition)
 						{
-							print("moving");	
 							MovePeople(false);
 						}
 					}
@@ -933,11 +933,7 @@ function Update ()
 	//if player hit the people goal
 	if (peopleSaved >= peopleGoal)
 	{
-		sS.b = bTime;
-		sS.l = true;
-		isPlayOne = true;
-		nextLevel = true;	
-		halt = true; //stop all the controls	
+		FlyAway = true;	
 	}
 	
 	//if player lost
@@ -961,7 +957,7 @@ function Update ()
 	
 	//if the level has been beat
 	if (nextLevel)
-	{		
+	{
 		if(inGame && !fromLSelect)
 		{
 			isPlayOne = true;
@@ -992,6 +988,15 @@ function Update ()
 	{
 		shrinkCheck();
 	}
+}
+
+function SetNextLevel()
+{
+	sS.b = bTime;
+	sS.l = true;
+	isPlayOne = true;
+	nextLevel = true;	
+	halt = true; //stop all the controls
 }
 
 //move people between objects
