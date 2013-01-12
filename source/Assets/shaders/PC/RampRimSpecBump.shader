@@ -14,6 +14,8 @@ Shader "Shaders/RampRimSpecBump"
 		
 		_RimColor("Rim Color", Color) = (1,1,1,1)
 		_RimPower("Rim Power", Range(0.5, 8.0)) = 3.0
+		
+		_Cube("Cube Map", CUBE) = "" {}
 	}
 	
 	SubShader 
@@ -33,6 +35,7 @@ Shader "Shaders/RampRimSpecBump"
 		sampler2D _BumpMap;
 		sampler2D _Ramp;
 		sampler2D _SpecMap;
+		samplerCUBE _Cube;
 		
 			
 		half4 LightingCustomDiffuse(SurfaceOutput s, half3 lightDir, half3 viewDir, half atten)
@@ -61,6 +64,8 @@ Shader "Shaders/RampRimSpecBump"
 			float2 uv_BumpMap;
 			float2 uv_SpecMap;
 			float3 viewDir;
+			float3 worldRefl;
+			INTERNAL_DATA
 		};
 		
 
@@ -69,6 +74,7 @@ Shader "Shaders/RampRimSpecBump"
 			IN.color = _ColorTint;
 			fixed4 tex = tex2D(_MainTex, IN.uv_MainTex);
 			o.Albedo = tex2D(_MainTex, IN.uv_MainTex).rgb * IN.color;
+			//o.Emission = texCube(_Cube, IN.worldRefl).rgb;
 			
 			//normal
 			o.Normal = UnpackNormal(tex2D(_BumpMap, IN.uv_BumpMap));
@@ -79,7 +85,7 @@ Shader "Shaders/RampRimSpecBump"
 			o.Gloss = tex2D(_SpecMap, IN.uv_SpecMap).rgb;
 			
 			half rim = 1.0 - saturate(dot(normalize(IN.viewDir), o.Normal));			
-			o.Emission = _RimColor.rbg * pow(rim, _RimPower);
+			o.Emission = (_RimColor.rgb * pow(rim, _RimPower));
 			
 		}
 		

@@ -17,7 +17,6 @@ private var numNext = 0;
 private var swapped = false;
 private var dummyObj : GameObject;
 private var Running = false;
-private var kick = false;
 private var virgin = true;
 private var hit : RaycastHit;
 private var awayStart : int;
@@ -54,29 +53,33 @@ function Start ()
 		}                
     }
     
-    //remove all the numbers before the previous level - 1
-    for (i = 0; i < prevLevel - 2; i++)
-    {
-    	numbers[i] = null;
-    }
-    
     //save the level names and time and turn off numbers and text
     for (i = 0; i < numbers.Length; i++)
     {
     	if (numbers[i] != null)
     	{
-	    	numbers[i].renderer.material.color.a = 0;
-	    	numbers[i].GetComponent(TextMesh).text = "";
+	    	//numbers[i].renderer.material.color.a = 0;
+	    	//numbers[i].GetComponent(TextMesh).text = "";
 	    	
 	    	names.Add(numbers[i].transform.parent.Find("Name").GetComponent(TextMesh).text);
-	    	numbers[i].transform.parent.Find("Name").GetComponent(TextMesh).text = "";
+	    	//numbers[i].transform.parent.Find("Name").GetComponent(TextMesh).text = "";
 	    	
 	    	times.Add(numbers[i].transform.parent.Find("Time").GetComponent(TextMesh).text);
-	    	numbers[i].transform.parent.Find("Time").GetComponent(TextMesh).text = "";
+	    	//numbers[i].transform.parent.Find("Time").GetComponent(TextMesh).text = "";
 	    	
-	    	numbers[i].transform.parent.transform.Find("CompletedPlane").GetComponent(TextMesh).text = "";
+	    	//numbers[i].transform.parent.transform.Find("CompletedPlane").GetComponent(TextMesh).text = "";
 	    }
     }
+    
+    //turn off the correct level tags
+    for (i = numNext; i < numbers.Length; i++)
+    {
+    	numbers[i].renderer.material.color.a = 0; //number material
+    	numbers[i].GetComponent(TextMesh).text = ""; //turn off number
+    	numbers[i].transform.parent.Find("Name").GetComponent(TextMesh).text = ""; //turn off name
+    	numbers[i].transform.parent.Find("Time").GetComponent(TextMesh).text = ""; //turn off time
+    	numbers[i].transform.parent.transform.Find("CompletedPlane").GetComponent(TextMesh).text = ""; //turn off completed plane
+    }  
     
     //start typing the levels out
     TypeControllerIn();    
@@ -98,17 +101,12 @@ function TypeControllerIn()
 			Running = true;
 			numNext++;
 		}
-		if (numNext == 19)
-		{
-			kick = true;
-		}
 		yield;
-	}while(!kick);
+	}while(numNext != 20);
 }
 
 function TypeControllerAway()
 {
-	kick = false;
 	Running = false;
 	do
 	{
@@ -118,12 +116,8 @@ function TypeControllerAway()
 			Running = true;
 			numNext++;
 		}
-		if (numNext >= awayStart + 6)
-		{
-			kick = true;
-		}
 		yield;
-	}while(!kick);
+	}while(numNext <= awayStart + 6);
 	NextLevelReady = true;
 }
 

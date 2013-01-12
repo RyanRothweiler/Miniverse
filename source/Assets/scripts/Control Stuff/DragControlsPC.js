@@ -200,6 +200,7 @@ private var dummyVector2 : Vector2;
 //private var PrevLevelNum : GameObject; //when moving back to the level select screen, this holds the level num of the level which the player came from
 private static var PrevLevelLoc : Vector3; //the previous level tag's location
 private var LevelOffset : Vector3; 
+private var Timer : LevelTimer; //the script which controls the level times
 
 //touch control variables
 public var Touch1StartPos = Vector2(0,0); //the start position of a touch
@@ -257,6 +258,7 @@ function Start ()
 	cont = false;
 	f = 0;
 	LevelOffset = Vector3.zero;
+	Timer = GetComponent(LevelTimer); //get the level timer
 	
 	//create ss
 	sS = new SaveStating();
@@ -908,6 +910,7 @@ function Update ()
 	//level intro transition
 	if (CanZoom && !nextLevel && transform.position.z <= camZStopPos)
 	{
+		//print("level introing");
 		halt = true;
 		//move the camera
 		transform.position.z += CameraPositionSpeed * Time.deltaTime;
@@ -917,6 +920,7 @@ function Update ()
 	}
 	else if(CanZoom)
 	{
+		Timer.StartTimer(); //start the level timer
 		for(var obj : GameObject in worldObjects)
 		{
 			obj.transform.parent == null;
@@ -933,7 +937,8 @@ function Update ()
 	//if player hit the people goal
 	if (peopleSaved >= peopleGoal)
 	{
-		FlyAway = true;	
+		FlyAway = true;
+		Timer.LevelDone(previousLevel);	
 	}
 	
 	//if player lost

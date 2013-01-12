@@ -103,6 +103,8 @@ function FlyAway()
 	FlameEffect.GetComponent(ParticleSystem).startSpeed  = 7; //enable flames
 	
 	yield WaitForSeconds(0.2);
+	FlameSmokeEffect.GetComponent(ParticleSystem).renderer.enabled = false; //disable smoke
+	FlameSmokeEffect.GetComponent(ParticleSystem).enableEmission = false; 
 	
 	animation["Outro"].speed = 2;
 	animation.CrossFade("Outro");

@@ -65,7 +65,9 @@
      <Compile Include="Assets\scripts\Level Select Stuff\LevelProgress.js" />
      <Compile Include="Assets\scripts\Level Select Stuff\LevelSelectObject.js" />
      <Compile Include="Assets\scripts\Level Select Stuff\LevelSelectPlanetController.js" />
+     <Compile Include="Assets\scripts\Level Select Stuff\LevelTimeType.js" />
      <Compile Include="Assets\scripts\Overhead Stuff\FPSDraw.js" />
+     <Compile Include="Assets\scripts\Overhead Stuff\LevelTimer.js" />
      <Compile Include="Assets\scripts\Overhead Stuff\PausePlane.js" />
      <Compile Include="Assets\scripts\Overhead Stuff\Platform_type.js" />
      <Compile Include="Assets\scripts\Overhead Stuff\SaveStating.js" />
