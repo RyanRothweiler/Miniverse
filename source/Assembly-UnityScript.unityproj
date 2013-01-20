@@ -56,6 +56,7 @@
      <Compile Include="Assets\scripts\Effects\TransitionStars.js" />
      <Compile Include="Assets\scripts\Human Stuff\HumanPerson.js" />
      <Compile Include="Assets\scripts\Human Stuff\HumanShip.js" />
+     <Compile Include="Assets\scripts\Key Stuff\KeyLockingController.js" />
      <Compile Include="Assets\scripts\Key Stuff\KeyPiece.js" />
      <Compile Include="Assets\scripts\Key Stuff\KeyPositions.js" />
      <Compile Include="Assets\scripts\Key Stuff\KeyShowController.js" />
@@ -81,6 +82,7 @@
      <Compile Include="Assets\scripts\Tutorial Stuff\FlyingPeople.js" />
      <Compile Include="Assets\scripts\Tutorial Stuff\TouchTutorial.js" />
      <Compile Include="Assets\scripts\UI Stuff\ProximityIndicator.js" />
+     <Compile Include="Assets\scripts\UI Stuff\SpriteSheetOffsetAnimation.js" />
      <Compile Include="Assets\scripts\UI Stuff\TextTypeEffect.js" />
      <None Include="Assets\shaders\PC\RampRim.shader" />
      <None Include="Assets\shaders\PC\CustFontShader.shader" />

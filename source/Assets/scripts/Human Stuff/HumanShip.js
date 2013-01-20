@@ -11,6 +11,7 @@ private var introDone = false;
 private var idleStart = false;
 private var switchStart = false;
 private var i : int;
+private var cont = true;
 
 function Start () 
 {
@@ -124,8 +125,12 @@ function CheckShipSize()
 		{
 			transform.parent.localPosition = Vector3(1000,1000,1000);
 		}
+		else
+		{
+			cont = false;
+		}
 		yield;
-	} while(true);
+	} while(cont);
 }
 
 function ScaleDownFlames()

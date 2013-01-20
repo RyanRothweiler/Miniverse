@@ -1,9 +1,16 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\scripts\Human Stuff\HumanShip.js">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\scripts\UI Stuff\SpriteSheetOffsetAnimation.js">
     <Files>
-      <File FileName="Assets\scripts\Control Stuff\DragControlsPC.js" Line="934" Column="4" />
-      <File FileName="Assets\scripts\Human Stuff\HumanShip.js" Line="106" Column="89" />
+      <File FileName="Assets\scripts\UI Stuff\SpriteSheetOffsetAnimation.js" Line="61" Column="85" />
+      <File FileName="Assets\scripts\Control Stuff\DragControlsPC.js" Line="1" Column="1" />
+      <File FileName="Assets\scripts\Human Stuff\HumanShip.js" Line="1" Column="1" />
+      <File FileName="Assets\scripts\UI Stuff\TextTypeEffect.js" Line="1" Column="1" />
+      <File FileName="Assets\scripts\Overhead Stuff\LevelTimer.js" Line="1" Column="1" />
+      <File FileName="Assets\scripts\Planet Stuff\PlanetSearcher.js" Line="1" Column="1" />
+      <File FileName="Assets\scripts\Level Select Stuff\LevelNumberTypeEffect.js" Line="1" Column="1" />
+      <File FileName="Assets\scripts\Key Stuff\KeyPiece.js" Line="1" Column="1" />
+      <File FileName="Assets\scripts\Overhead Stuff\SaveStating.js" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

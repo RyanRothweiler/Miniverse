@@ -36,6 +36,24 @@ function Start ()
 {
 	//get drag controls script
 	DragControls = Camera.main.GetComponent(DragControlsPC);
+	
+	//initialize mated
+	if (Mate1 == null)
+	{
+		Mated1 = true;
+	}
+	if (Mate2 == null)
+	{
+		Mated2 = true;
+	}
+	if (Mate3 == null)
+	{
+		Mated3 = true;
+	}
+	if (Mate4 == null)
+	{
+		Mated4 = true;
+	}
 }
 
 function Update () 

@@ -154,7 +154,7 @@ private var j : int;
 private var num : int;
 private var dummyNum : int;
 
-//arrays
+//array
 private var objects : GameObject[];
 public var worldObjects : GameObject[];
 private var sunObjects : GameObject[];
@@ -179,6 +179,7 @@ static var fromLSelect : boolean;
 private var buttonPushed = false;//if the back button was pushed
 private var CanZoom = true; //if the level can level transition zoom
 private var LevelFirst = true;
+private var levelWon = false;
 
 //Strings
 private var Level : String;
@@ -934,9 +935,10 @@ function Update ()
 		}
 	}
 	
-	//if player hit the people goal
+	//if player hit the people goal. win condition
 	if (peopleSaved >= peopleGoal)
 	{
+		LevelWon();
 		FlyAway = true;
 		Timer.LevelDone(previousLevel);	
 	}
@@ -1516,7 +1518,7 @@ function LevelLose()
 	yield WaitForSeconds(1.5);
 	
 	//untype old text
-	LevelLoseLost();
+	LevelLost = true;
 	str = FailType.text;
 	j = str.Length;
 	for (i = 0; i < j; i++)
@@ -1529,8 +1531,13 @@ function LevelLose()
 		}
 	}
 }
-function LevelLoseLost()
+
+function LevelWon()
 {
-	//yield WaitForSeconds(0.2);
-	LevelLost = true;
+	if (!levelWon)
+	{
+		levelWon = true;
+		FailType.GetComponent(TextTypeEffect).TextToType = "LEVEL WON";
+		FailType.GetComponent(TextTypeEffect).Done = false;
+	}
 }
