@@ -23,9 +23,6 @@ function Start ()
 	xRatio = (FrameSize.x / SheetSize.x) * 2;
 	yRatio = (FrameSize.y / SheetSize.y) * 2;
 	
-	print(xRatio);
-	print(yRatio);
-	
 	//init
 	i = 0;
 	col = -1;
@@ -65,7 +62,6 @@ function IncrementFrame()
 {
 	if (CurrentFrame + 1 > FrameNum)
 	{
-		print("looping");
 		//loop back
 		row = 0;
 		col = -1;

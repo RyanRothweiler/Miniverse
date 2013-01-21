@@ -112,9 +112,17 @@ function TypeControllerAway()
 	{
 		if (!Running)
 		{
-			TypeStartAway(numbers[numNext], numNext+1, names[numNext], times[numNext]);
-			Running = true;
-			numNext++;
+			if (!(numNext+1 > numbers.Length))
+			{
+				TypeStartAway(numbers[numNext], numNext+1, names[numNext], times[numNext]);
+				Running = true;
+				numNext++;
+			}
+			else
+			{
+				NextLevelReady = true;
+				return;
+			}
 		}
 		yield;
 	}while(numNext <= awayStart + 6);
@@ -199,31 +207,21 @@ function LevelLookingAt() //find which level the camera is looking at
 {
 	if (Physics.Raycast(Vector3(Camera.main.transform.position.x, Camera.main.transform.position.y - 3.5, Camera.main.transform.position.z), Camera.main.transform.forward * 1000, hit, 1000))
 	{
-		numNext = int.Parse(hit.collider.transform.Find("Num").GetComponent(TextMesh).text);
-		if (numNext > 4)
-		{
-			numNext -= 3;
-		}
-		else
-		{
-			numNext = 0;
-		}
-		awayStart = numNext;
+		Check();
 	}
 	else if (Physics.Raycast(Vector3(Camera.main.transform.position.x - 3, Camera.main.transform.position.y - 3.5, Camera.main.transform.position.z), Camera.main.transform.forward * 1000, hit, 1000))
 	{
-		numNext = int.Parse(hit.collider.transform.Find("Num").GetComponent(TextMesh).text);
-		if (numNext > 4)
-		{
-			numNext -= 3;
-		}
-		else
-		{
-			numNext = 0;
-		}
-		awayStart = numNext;
+		Check();
 	}
 	else if (Physics.Raycast(Vector3(Camera.main.transform.position.x + 3, Camera.main.transform.position.y - 3.5, Camera.main.transform.position.z), Camera.main.transform.forward * 1000, hit, 1000))
+	{
+		Check();
+	}
+}
+
+function Check()
+{
+	if (hit.collider.transform.Find("Num").GetComponent(TextMesh).text != "BOSS LEVEL")
 	{
 		numNext = int.Parse(hit.collider.transform.Find("Num").GetComponent(TextMesh).text);
 		if (numNext > 4)
@@ -235,5 +233,10 @@ function LevelLookingAt() //find which level the camera is looking at
 			numNext = 0;
 		}
 		awayStart = numNext;
+	}
+	else
+	{
+		numNext = 18;
+		awayStart = 18;
 	}
 }
