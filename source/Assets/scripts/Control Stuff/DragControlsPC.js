@@ -325,14 +325,14 @@ function Start ()
 	}
 	else
 	{
-//		print("IOS");
-//		DragRate = 0.02;
-//		WorldDraggingInverted = false;
-//		PlatformIOS = true;
-//		PlatformPC = false;
-		print("PC");
-		PlatformPC = true;
-		PlatformIOS = false;
+		print("IOS");
+		DragRate = 0.02;
+		WorldDraggingInverted = false;
+		PlatformIOS = true;
+		PlatformPC = false;
+//		print("PC");
+//		PlatformPC = true;
+//		PlatformIOS = false;
 	}
 	
 }
@@ -1337,21 +1337,26 @@ function LevelSelect()
 				{						
 					Touch1Move = true;
 					Touch1Tap = false;
-					
+					 
 					MovementControllerOldPos = LevelOffset;
-					
 					//limit movement 
-					if (LevelSelectMovementController.transform.position.x + (touch.deltaPosition.x * Time.deltaTime) * LevelSelectDragRate < 0 ){ //left side
+					if (LevelSelectMovementController.transform.position.x + (touch.deltaPosition.x * Time.deltaTime) * LevelSelectDragRate < 8) //left side 
+					{ 
 						LevelOffset.x += (touch.deltaPosition.x * Time.deltaTime) * LevelSelectDragRate;
 					}
-					else {
-						LevelOffset.x += 0;
+					else 
+					{ 
+						LevelOffset.x = 8; 
+						return; //then kick out
 					}
-					if (LevelSelectMovementController.transform.position.x + (touch.deltaPosition.x * Time.deltaTime) * LevelSelectDragRate > -120){ //right side
+					if (LevelSelectMovementController.transform.position.x + (touch.deltaPosition.x * Time.deltaTime) * LevelSelectDragRate > -120) //right side
+					{ 
 						LevelOffset.x += (touch.deltaPosition.x * Time.deltaTime) * LevelSelectDragRate;
 					}
-					else {
-						LevelOffset.x += -120;
+					else 
+					{
+						LevelOffset.x += -120; 
+						return; //kick out
 					}
 						
 					Movement1Delta = MovementControllerOldPos - LevelOffset;
@@ -1369,22 +1374,25 @@ function LevelSelect()
 			if (Touch1Move)
 			{				
 				//limit movement
-				if (LevelOffset.x - Movement1Delta.x < 0 ){ //left side
+				if (LevelOffset.x - Movement1Delta.x < 8) //left side
+				{ 
 					LevelOffset.x -= (Movement1Delta.x);
 				}
 				else
 				{
 					//end the flick
-					print("limiting and ending the flick");
-					LevelOffset.x = 0;
+					print("limiting and ending the flick now");
+					LevelOffset.x = 8;
 					
 					Touch1StartPos = Vector2(0,0);
 					Touch1EndPos = Vector2(1000,1000);		
 					Movement1Delta.x = 0;
 					Touch1Move = false;
 				}
-				if (LevelOffset.x - Movement1Delta.x > -120) //right side
-					LevelOffset.x -= (Movement1Delta.x);
+				if (LevelOffset.x - Movement1Delta.x > -120) //right side 
+				{
+					LevelOffset.x -= (Movement1Delta.x); 
+				}
 				else
 				{
 					//end the flick
