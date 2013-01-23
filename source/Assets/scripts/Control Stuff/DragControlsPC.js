@@ -154,7 +154,7 @@ private var j : int;
 private var num : int;
 private var dummyNum : int;
 
-//arrays
+//array
 private var objects : GameObject[];
 public var worldObjects : GameObject[];
 private var sunObjects : GameObject[];
@@ -179,6 +179,7 @@ static var fromLSelect : boolean;
 private var buttonPushed = false;//if the back button was pushed
 private var CanZoom = true; //if the level can level transition zoom
 private var LevelFirst = true;
+private var levelWon = false;
 
 //Strings
 private var Level : String;
@@ -934,9 +935,10 @@ function Update ()
 		}
 	}
 	
-	//if player hit the people goal
+	//if player hit the people goal. win condition
 	if (peopleSaved >= peopleGoal)
 	{
+		LevelWon();
 		FlyAway = true;
 		Timer.LevelDone(previousLevel);	
 	}
@@ -983,7 +985,7 @@ function Update ()
 				StarStreakMat.SetColor("_TintColor",Color(StarStreakMat.GetColor("_TintColor").r, StarStreakMat.GetColor("_TintColor").g, StarStreakMat.GetColor("_TintColor").b, 0));
 				Application.LoadLevel(Level);
 				inGame = true;
-				fromLSelect = false; 
+				fromLSelect = false;
 			}
 		}
 	}
@@ -1267,7 +1269,7 @@ function LevelSelect()
 			if(Physics.Raycast(Camera.main.WorldToScreenPoint(Vector3(Input.mousePosition.x,Input.mousePosition.y,Camera.main.transform.position.z)), Camera.main.ScreenToWorldPoint(Vector3(Input.mousePosition.x, Input.mousePosition.y, WorldZDepth - Camera.main.transform.position.z)), objectInfo))
 			{
 				//if a level tag
-				if (objectInfo.collider.tag == "LevelTag")
+				if (objectInfo.collider.tag == "LevelTag" && (objectInfo.collider.transform.Find("Num").GetComponent(TextMesh).text != "BOSS LEVEL"))
 				{
 					//Level is set to the collider's name and then loaded. See "nextLevel" code in update function.
 					previousLevel = int.Parse(objectInfo.collider.transform.Find("Num").GetComponent(TextMesh).text);
@@ -1279,12 +1281,24 @@ function LevelSelect()
 					isMenu = false;
 					inGame = true;
 					fromLSelect = true;
-					//Goes back to main menu	
-					if(objectInfo.collider.name == "mainmenu")
+				}
+				else if(objectInfo.collider.tag == "LevelTag" && objectInfo.collider.transform.Find("Num").GetComponent(TextMesh).text == "BOSS LEVEL") //check boss level
+				{
+					if (!this.GetComponent(KeyLockingController).Locked)
 					{
-						Application.LoadLevel("mainmenu");
+						previousLevel = 20;
+						Level = objectInfo.collider.name;
+						PrevLevelLoc = LevelSelectMovementController.transform.position;
+						LevelOffset = Vector3.zero;
+						nextLevel = true;
 						isLevelSelect = false;
-						isMenu = true;
+						isMenu = false;
+						inGame = true;
+						fromLSelect = true;
+					}
+					else
+					{
+						print("locked");
 					}
 				}
 			}
@@ -1516,7 +1530,7 @@ function LevelLose()
 	yield WaitForSeconds(1.5);
 	
 	//untype old text
-	LevelLoseLost();
+	LevelLost = true;
 	str = FailType.text;
 	j = str.Length;
 	for (i = 0; i < j; i++)
@@ -1529,8 +1543,13 @@ function LevelLose()
 		}
 	}
 }
-function LevelLoseLost()
+
+function LevelWon()
 {
-	//yield WaitForSeconds(0.2);
-	LevelLost = true;
+	if (!levelWon)
+	{
+		levelWon = true;
+		FailType.GetComponent(TextTypeEffect).TextToType = "LEVEL WON";
+		FailType.GetComponent(TextTypeEffect).Done = false;
+	}
 }
