@@ -110,6 +110,7 @@ public var CameraViewPlanetPush : boolean; //if pushing a planet toward the edge
 public var Transitioning = false; //if the level is in transition or not
 public var LevelLost = false; //triggered by lose condition
 public var FlyAway = false; //flying the spaceship away to the next level
+public var StartZoomedOut = true; //if the level starts in the paused zoomed out view or the play view
 
 public var Phase1 = false;
 public var Phase2 = false;
@@ -186,6 +187,8 @@ private var CanZoom = true; //if the level can level transition zoom
 private var LevelFirst = true;
 private var levelWon = false;
 private var ZoomVirgin = true;
+private var canMoveToWorld = true; //if can zoom to world
+private var canMoveToPlay = false; //if can zoom to play
 
 //Strings
 private var Level : String;
@@ -266,7 +269,11 @@ function Start ()
 	f = 0;
 	LevelOffset = Vector3.zero;
 	Timer = GetComponent(LevelTimer); //get the level timer
-	shipLoc = GameObject.Find("humanShip").transform.position;
+	
+	if (!LevelSelect)
+	{
+		shipLoc = GameObject.Find("humanShip").transform.position;
+	}
 	
 	//center scale controller
 	SceneScaleController.transform.position = Vector3(this.transform.position.x, this.transform.position.y, SceneScaleController.transform.position.z);
@@ -335,14 +342,14 @@ function Start ()
 	}
 	else
 	{
-//		print("IOS");
-//		DragRate = 0.02;
-//		WorldDraggingInverted = false;
-//		PlatformIOS = true;
-//		PlatformPC = false;
-		print("PC");
-		PlatformPC = true;
-		PlatformIOS = false;
+		print("IOS");
+		DragRate = 0.02;
+		WorldDraggingInverted = false;
+		PlatformIOS = true;
+		PlatformPC = false;
+//		print("PC");
+//		PlatformPC = true;
+//		PlatformIOS = false;
 	}
 	
 }
@@ -953,16 +960,20 @@ function Update ()
 			halt = false;
 		}
 		
-		//setup zoom info
-		
-		//init pause plane
-		PausePlane.GetComponent(TextTypeEffect).ParentCheck = false;
-		PausePlane.GetComponent(TextTypeEffect).Done = false; 
-		PausePlane.GetComponent(TextTypeEffect).TextToType = "PAUSED";
-		
-		cameraZoomInPos = Vector3(shipLoc.x, shipLoc.y, CameraLocDepth);
-		LevelPaused = true;
-		CanZoom = false;
+		//if start zoomed out and paused
+		if (StartZoomedOut)
+		{
+			canMoveToWorld = false;
+			canMoveToPlay = true;
+			
+			PausePlane.GetComponent(TextTypeEffect).ParentCheck = false;
+			PausePlane.GetComponent(TextTypeEffect).Done = false; 
+			PausePlane.GetComponent(TextTypeEffect).TextToType = "PAUSED";
+			
+			cameraZoomInPos = Vector3(shipLoc.x, shipLoc.y, CameraLocDepth);
+			LevelPaused = true;
+			CanZoom = false;
+		}
 	}
 	
 	//if player hit the people goal. win condition
@@ -1500,31 +1511,47 @@ function OnGUI()
 //zoom world out and pause everything. go to world view. PinchIn
 function MoveToWorldView()
 {
-	cameraZoomInPos = transform.position;
-	cameraZoomInPos.z = CameraLocDepth;
-	//type in pause text
-	PausePlane.GetComponent(TextTypeEffect).Done = false;
-	PausePlane.GetComponent(TextTypeEffect).TextToType = "PAUSED";
-	
-	//move out camera
-	yield StartCoroutine(MoveTo(0.2,CameraZoomOutPos));
-	
-	LevelPaused = true;
-	CanZoom = false;
+//	if (canMoveToWorld)
+//	{
+		print("moving to world");
+		canMoveToWorld = false;
+		canMoveToPlay = true;
+		
+		cameraZoomInPos = transform.position;
+		cameraZoomInPos.z = CameraLocDepth;
+		
+		//type in pause text
+		PausePlane.GetComponent(TextTypeEffect).ParentCheck = false;
+		PausePlane.GetComponent(TextTypeEffect).Done = false;
+		PausePlane.GetComponent(TextTypeEffect).TextToType = "PAUSED";
+		
+		//move out camera
+		yield StartCoroutine(MoveTo(0.2,CameraZoomOutPos));
+		
+		LevelPaused = true;
+		CanZoom = false;
+	//}
 }
 
 //zoom world in and play everything. go to play view. PinchOut
 function MoveToPlayView()
 {	
-	//type away pause text
-	PausePlane.GetComponent(TextTypeEffect).Done = false;
-	PausePlane.GetComponent(TextTypeEffect).TextToType = " ";
-	
-	//move in camera
-	yield StartCoroutine(MoveTo(0.2,cameraZoomInPos));
-	
-	LevelPaused = false;
-	CanZoom = true;
+//	if (canMoveToPlay)
+//	{
+		print("moving to play");
+		canMoveToPlay = false;
+		canMoveToWorld = true;
+		
+		//type away pause text
+		PausePlane.GetComponent(TextTypeEffect).Done = false;
+		PausePlane.GetComponent(TextTypeEffect).TextToType = " ";
+		
+		//move in camera
+		yield StartCoroutine(MoveTo(0.2,cameraZoomInPos));
+		
+		LevelPaused = false;
+		CanZoom = true;
+//	}
 }
 
 //push the camera around when dragging planets
@@ -1609,29 +1636,45 @@ function MoveTo(time : float, target : Vector3)
 	xRate = (target.x - transform.position.x) / (time);
 	yRate = (target.y - transform.position.y) / (time);
 	zRate = (target.z - transform.position.z) / (time);
+	cont = true;
 	
 	//move stuff
-	if (transform.position.z > target.z)
+	if (transform.position.z > target.z) //zooming out to world view
 	{
 		do
 		{
-			transform.position.x += xRate * Time.deltaTime;
-			transform.position.y += yRate * Time.deltaTime;
-			transform.position.z += zRate * Time.deltaTime;
+			if ((transform.position.z + (zRate * Time.deltaTime)) < target.z)
+			{
+				cont = false;
+			}
+			else
+			{
+				transform.position.x += xRate * Time.deltaTime;
+				transform.position.y += yRate * Time.deltaTime;
+				transform.position.z += zRate * Time.deltaTime;
+			}
 			yield;
-		} while (transform.position.z > target.z);
+		} while (cont);
+		transform.position = target;
 		return;
 	}
-	if (transform.position.z < target.z)
+	if (transform.position.z < target.z) //zooming in to play view
 	{
-		print("in here");
 		do
 		{
-			transform.position.x += xRate * Time.deltaTime;
-			transform.position.y += yRate * Time.deltaTime;
-			transform.position.z += zRate * Time.deltaTime;
+			if ((transform.position.z + (zRate * Time.deltaTime)) > target.z)
+			{
+				cont = false;
+			}
+			else
+			{
+				transform.position.x += xRate * Time.deltaTime;
+				transform.position.y += yRate * Time.deltaTime;
+				transform.position.z += zRate * Time.deltaTime;
+			}
 			yield;
-		} while (transform.position.z < target.z);
+		} while (cont);
+		transform.position = target;
 		return;
 	}
 }
