@@ -21,6 +21,6 @@ function Update ()
 		Locked = false;
 		
 		//turn off lock texture
-		transform.GetChild(0).GetChild(0).renderer.active = false;
+		transform.GetChild(0).GetChild(0).renderer.enabled = false;
 	}
 }

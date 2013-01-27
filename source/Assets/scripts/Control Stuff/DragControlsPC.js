@@ -87,6 +87,7 @@ public var peopleSaved = 0; //number of people saved
 public var peopleGoal : int; //win condition of the level
 public var peopleAlive : int; //People # Monitor
 public var WorldZDepth : int; //depth of the plane which all interactable object sit on
+public var CameraLocDepth : int; //the z depth which the camer sits on
 public static var previousLevel = 0; //the level num which the player was in last
 
 public var worldDist : float; //distance which the worlds must stay to the sun
@@ -144,6 +145,7 @@ public var StarStreakMat : Material;
 private var rotationSpeed = 10.0;
 private var lerpSpeed = 1.0;
 private var f = 0.0;
+private var startTime : float;
 
 //ints
 private var camZStopPos = -11;
@@ -153,6 +155,9 @@ private var x : int;
 private var j : int;
 private var num : int;
 private var dummyNum : int;
+public var xRate : int; //rate of movement in x axis (used for MoveTo())
+public var yRate : int; //rate of movement in y axis
+public var zRate : int; //rate of movement in z axis
 
 //array
 private var objects : GameObject[];
@@ -180,6 +185,7 @@ private var buttonPushed = false;//if the back button was pushed
 private var CanZoom = true; //if the level can level transition zoom
 private var LevelFirst = true;
 private var levelWon = false;
+private var ZoomVirgin = true;
 
 //Strings
 private var Level : String;
@@ -195,12 +201,13 @@ private var shrinkCode : ShrinkCode;
 private var flyingPeople : FlyingPeople;
 private var radiiBall : Transform;
 private var child : GameObject; //a dummy child game object
-private var cameraZoomInPos : Vector3; //the position the camera zooms into. aka the position the camera was at when it zoomed out
+public var cameraZoomInPos : Vector3; //the position the camera zooms into. aka the position the camera was at when it zoomed out
 private var dummyVector3 : Vector3;
 private var dummyVector2 : Vector2;
 //private var PrevLevelNum : GameObject; //when moving back to the level select screen, this holds the level num of the level which the player came from
 private static var PrevLevelLoc : Vector3; //the previous level tag's location
 private var LevelOffset : Vector3; 
+private var shipLoc : Vector3; //the location of the ship
 private var Timer : LevelTimer; //the script which controls the level times
 
 //touch control variables
@@ -234,7 +241,6 @@ private var PinchOut = false;
 
 //Level Saving/Progress/Time Specific Vars
 private static var sS : SaveStating;
-private var startTime : int;
 private var bTime : int;
 
 //camera zooming
@@ -260,6 +266,10 @@ function Start ()
 	f = 0;
 	LevelOffset = Vector3.zero;
 	Timer = GetComponent(LevelTimer); //get the level timer
+	shipLoc = GameObject.Find("humanShip").transform.position;
+	
+	//center scale controller
+	SceneScaleController.transform.position = Vector3(this.transform.position.x, this.transform.position.y, SceneScaleController.transform.position.z);
 	
 	//create ss
 	sS = new SaveStating();
@@ -325,14 +335,14 @@ function Start ()
 	}
 	else
 	{
-		print("IOS");
-		DragRate = 0.02;
-		WorldDraggingInverted = false;
-		PlatformIOS = true;
-		PlatformPC = false;
-//		print("PC");
-//		PlatformPC = true;
-//		PlatformIOS = false;
+//		print("IOS");
+//		DragRate = 0.02;
+//		WorldDraggingInverted = false;
+//		PlatformIOS = true;
+//		PlatformPC = false;
+		print("PC");
+		PlatformPC = true;
+		PlatformIOS = false;
 	}
 	
 }
@@ -411,11 +421,13 @@ function Update ()
 			//zooming out
 			if(CanScrollZoom && !LevelPaused && Input.GetAxis("Mouse ScrollWheel") < 0)
 			{
+				StopAllCoroutines();
 				MoveToWorldView();
 			}
 			//zooming in
 			if (CanScrollZoom && LevelPaused && Input.GetAxis("Mouse ScrollWheel") > 0)
 			{
+				StopAllCoroutines();
 				MoveToPlayView();
 			}
 			
@@ -712,6 +724,7 @@ function Update ()
 						PinchIn = true; 
 						if (!LevelPaused) 
 						{
+							StopAllCoroutines();
 							MoveToWorldView(); 
 						}
 					}
@@ -723,6 +736,7 @@ function Update ()
 						PinchIn = true; 
 						if (!LevelPaused) 
 						{
+							StopAllCoroutines();
 							MoveToWorldView(); 
 						}
 					}
@@ -735,6 +749,7 @@ function Update ()
 						PinchIn = true; 
 						if (!LevelPaused) 
 						{
+							StopAllCoroutines();
 							MoveToWorldView(); 
 						}
 					}
@@ -746,6 +761,7 @@ function Update ()
 						PinchIn = true; 
 						if (!LevelPaused) 
 						{
+							StopAllCoroutines();
 							MoveToWorldView(); 
 						}
 					}
@@ -762,6 +778,7 @@ function Update ()
 							PinchOut = true; 
 							if (LevelPaused) 
 							{
+								StopAllCoroutines();
 								MoveToPlayView(); 
 							}
 						}
@@ -773,6 +790,7 @@ function Update ()
 							PinchOut = true; 
 							if (LevelPaused) 
 							{
+								StopAllCoroutines();
 								MoveToPlayView(); 
 							}
 						}
@@ -785,6 +803,7 @@ function Update ()
 							PinchOut = true;
 							if (LevelPaused) 
 							{
+								StopAllCoroutines();
 								MoveToPlayView(); 
 							}
 						}
@@ -796,6 +815,7 @@ function Update ()
 							PinchOut = true; 
 							if (LevelPaused) 
 							{
+								StopAllCoroutines();
 								MoveToPlayView(); 
 							}
 						}
@@ -909,30 +929,40 @@ function Update ()
 	
 	
 	//level intro transition
-	if (CanZoom && !nextLevel && transform.position.z <= camZStopPos)
+	if (CanZoom && !nextLevel && transform.position.z <= camZStopPos && !(SceneScaleController.transform.localScale.x >= 0.97 && SceneScaleController.transform.localScale.y >= 0.97 && SceneScaleController.transform.localScale.x >= 0.97))
 	{
-		//print("level introing");
 		halt = true;
-		//move the camera
-		transform.position.z += CameraPositionSpeed * Time.deltaTime;
-		
-		if (!(SceneScaleController.transform.localScale.x >= 1 && SceneScaleController.transform.localScale.y >= 1 && SceneScaleController.transform.localScale.x >= 1))
-			SceneScaleController.transform.localScale += Vector3(CameraScaleSpeed * Time.deltaTime,CameraScaleSpeed * Time.deltaTime,CameraScaleSpeed * Time.deltaTime);			
+		SceneScaleController.transform.localScale += Vector3(CameraScaleSpeed * Time.deltaTime,CameraScaleSpeed * Time.deltaTime,CameraScaleSpeed * Time.deltaTime);			
 	}
-	else if(CanZoom)
+	else if(CanZoom && ZoomVirgin)
 	{
+		ZoomVirgin = false;
 		Timer.StartTimer(); //start the level timer
-		for(var obj : GameObject in worldObjects)
+		
+		//unparent...ERVERRRTHNNGG
+		SceneScaleController.transform.localScale = Vector3(1,1,1);
+		for (var obj : GameObject in worldObjects)
 		{
 			obj.transform.parent == null;
 		}
-		SceneScaleController.transform.localScale = Vector3(1,1,1);
 		SceneScaleController.transform.DetachChildren();
 		this.transform.DetachChildren();
 		
-		if (!isLevelSelect) {
+		if (!isLevelSelect) 
+		{
 			halt = false;
 		}
+		
+		//setup zoom info
+		
+		//init pause plane
+		PausePlane.GetComponent(TextTypeEffect).ParentCheck = false;
+		PausePlane.GetComponent(TextTypeEffect).Done = false; 
+		PausePlane.GetComponent(TextTypeEffect).TextToType = "PAUSED";
+		
+		cameraZoomInPos = Vector3(shipLoc.x, shipLoc.y, CameraLocDepth);
+		LevelPaused = true;
+		CanZoom = false;
 	}
 	
 	//if player hit the people goal. win condition
@@ -1470,20 +1500,29 @@ function OnGUI()
 //zoom world out and pause everything. go to world view. PinchIn
 function MoveToWorldView()
 {
-	PausePlane.transform.GetChild(0).renderer.enabled = true;//turn on pause plane
-	
 	cameraZoomInPos = transform.position;
-	transform.position = CameraZoomOutPos;
+	cameraZoomInPos.z = CameraLocDepth;
+	//type in pause text
+	PausePlane.GetComponent(TextTypeEffect).Done = false;
+	PausePlane.GetComponent(TextTypeEffect).TextToType = "PAUSED";
+	
+	//move out camera
+	yield StartCoroutine(MoveTo(0.2,CameraZoomOutPos));
+	
 	LevelPaused = true;
 	CanZoom = false;
 }
 
 //zoom world in and play everything. go to play view. PinchOut
 function MoveToPlayView()
-{
-	PausePlane.transform.GetChild(0).renderer.enabled = false;//turn off pause plane
+{	
+	//type away pause text
+	PausePlane.GetComponent(TextTypeEffect).Done = false;
+	PausePlane.GetComponent(TextTypeEffect).TextToType = " ";
 	
-	transform.position = cameraZoomInPos;
+	//move in camera
+	yield StartCoroutine(MoveTo(0.2,cameraZoomInPos));
+	
 	LevelPaused = false;
 	CanZoom = true;
 }
@@ -1528,6 +1567,7 @@ function CameraViewPlanetPushing()
 	}
 }
 
+//if the level was lost
 function LevelLose()
 {
 	halt = true;
@@ -1552,6 +1592,7 @@ function LevelLose()
 	}
 }
 
+//if the level is won
 function LevelWon()
 {
 	if (!levelWon)
@@ -1559,5 +1600,38 @@ function LevelWon()
 		levelWon = true;
 		FailType.GetComponent(TextTypeEffect).TextToType = "LEVEL WON";
 		FailType.GetComponent(TextTypeEffect).Done = false;
+	}
+}
+
+function MoveTo(time : float, target : Vector3)
+{
+	//set rates and get start time
+	xRate = (target.x - transform.position.x) / (time);
+	yRate = (target.y - transform.position.y) / (time);
+	zRate = (target.z - transform.position.z) / (time);
+	
+	//move stuff
+	if (transform.position.z > target.z)
+	{
+		do
+		{
+			transform.position.x += xRate * Time.deltaTime;
+			transform.position.y += yRate * Time.deltaTime;
+			transform.position.z += zRate * Time.deltaTime;
+			yield;
+		} while (transform.position.z > target.z);
+		return;
+	}
+	if (transform.position.z < target.z)
+	{
+		print("in here");
+		do
+		{
+			transform.position.x += xRate * Time.deltaTime;
+			transform.position.y += yRate * Time.deltaTime;
+			transform.position.z += zRate * Time.deltaTime;
+			yield;
+		} while (transform.position.z < target.z);
+		return;
 	}
 }

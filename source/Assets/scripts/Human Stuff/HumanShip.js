@@ -15,9 +15,8 @@ private var cont = true;
 
 function Start () 
 {
-	//move ship
-	oldPos = transform.parent.localPosition;
-	transform.parent.localPosition = Vector3(1000,1000,1000);
+	//hide ship
+	HideShip();
 	
 	//setup particle effects
 	FlameSmokeEffect.GetComponent(ParticleSystem).enableEmission = false;
@@ -55,7 +54,7 @@ function Update ()
 	//intro
 	if (transform.parent.parent == null && !introDone)
 	{
-		transform.parent.position = oldPos;
+		ShowShip();
 		introDone = true;
 		animation.Play("Intro");
 		animation["Intro"].speed = 2;
@@ -140,4 +139,18 @@ function ScaleDownFlames()
 		FlameEffect.GetComponent(ParticleSystem).startSize -= 0.01 * Time.deltaTime;
 		yield;
 	} while (FlameEffect.GetComponent(ParticleSystem).startSize > 0);
+}
+
+function HideShip()
+{
+	this.renderer.enabled = false;
+	FlameEffect.renderer.enabled = false;
+	FlameSmokeEffect.renderer.enabled = false;
+}
+
+function ShowShip()
+{
+	this.renderer.enabled = true;
+	FlameEffect.renderer.enabled = true;
+	FlameSmokeEffect.renderer.enabled = true;
 }
