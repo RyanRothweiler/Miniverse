@@ -96,16 +96,20 @@ public var CameraPositionSpeed : float; // the speed which the camera moves in d
 public var CameraScaleSpeed : float; //the speed which the world scales up and down in the level transitions 
 public var LevelSelectDragRate : float; //rate at which the level select tags are drug 
 
+static var leveloffsetX : float;//save level offest x position
+static var leveloffsetY : float;
+static var leveloffsetZ : float;
+
 public var WorldDraggingInverted : boolean; //if world dragging is inverted
 public var CanMoveCameraHorizontal : boolean; //if the player can move the camera horizontally
-public var TouchAutoMove : boolean; //if true then when a planet is touched, the camera will automatically move up until the end of the level
+public var TouchAutoMove : boolean; //if true then when a planet is touched, the camera will automatically move up until the end of the level. used on the boss level
 public var sunShrink : boolean;
-public var AutoMoving = false;
+public var AutoMoving = false; //boss level moving
 public var isMenu : boolean;
 public var isLevelSelect : boolean;
 public var CanScrollZoom : boolean; //if the level can scrool zoom
 public var LevelPaused : boolean; //if the level is paused. Only zoom controls work if the level is paused. 
-public var CanViewDrag : boolean; //if the player can drag the view around
+public var CanViewDrag : boolean; //if the player can drag the view around through touching in blank space.
 public var CameraViewPlanetPush : boolean; //if pushing a planet toward the edge of the screen then the camera moves
 public var Transitioning = false; //if the level is in transition or not
 public var LevelLost = false; //triggered by lose condition
@@ -352,6 +356,12 @@ function Start ()
 //		PlatformIOS = false;
 	}
 	
+	//ios initializations
+	if (PlatformIOS)
+	{
+		LevelOffset = Vector3(leveloffsetX, leveloffsetY, leveloffsetZ);
+	}
+	
 }
 
 //main update function
@@ -470,22 +480,26 @@ function Update ()
 			{
 				if (CanMoveCameraHorizontal)
 				{
-					if (WorldDraggingInverted) {
+					if (WorldDraggingInverted) 
+					{
 						FailType.transform.parent = this.transform;
 						this.transform.Translate(Vector3(Input.GetAxis("Horizontal") * DragRate, Input.GetAxis("Vertical") * DragRate, 0));
 					}
-					else {
+					else 
+					{
 						FailType.transform.parent = this.transform;
 						this.transform.Translate(Vector3(Input.GetAxis("Horizontal") * DragRate * -1, Input.GetAxis("Vertical") * DragRate * -1, 0));
 					}
 				}
 				else
 				{
-					if (WorldDraggingInverted) {
+					if (WorldDraggingInverted) 
+					{
 						FailType.transform.parent = this.transform;
 						this.transform.Translate(0, Input.GetAxis("Vertical") * DragRate, 0);
 					}
-					else {
+					else 
+					{
 						FailType.transform.parent = this.transform;
 						this.transform.Translate(0, Input.GetAxis("Vertical") * DragRate * -1, 0);
 					}
@@ -731,7 +745,7 @@ function Update ()
 						PinchIn = true; 
 						if (!LevelPaused) 
 						{
-							StopAllCoroutines();
+							//StopAllCoroutines();
 							MoveToWorldView(); 
 						}
 					}
@@ -743,7 +757,7 @@ function Update ()
 						PinchIn = true; 
 						if (!LevelPaused) 
 						{
-							StopAllCoroutines();
+							//StopAllCoroutines();
 							MoveToWorldView(); 
 						}
 					}
@@ -756,7 +770,7 @@ function Update ()
 						PinchIn = true; 
 						if (!LevelPaused) 
 						{
-							StopAllCoroutines();
+							//StopAllCoroutines();
 							MoveToWorldView(); 
 						}
 					}
@@ -768,7 +782,7 @@ function Update ()
 						PinchIn = true; 
 						if (!LevelPaused) 
 						{
-							StopAllCoroutines();
+							//StopAllCoroutines();
 							MoveToWorldView(); 
 						}
 					}
@@ -785,7 +799,7 @@ function Update ()
 							PinchOut = true; 
 							if (LevelPaused) 
 							{
-								StopAllCoroutines();
+								//StopAllCoroutines();
 								MoveToPlayView(); 
 							}
 						}
@@ -797,7 +811,7 @@ function Update ()
 							PinchOut = true; 
 							if (LevelPaused) 
 							{
-								StopAllCoroutines();
+								//StopAllCoroutines();
 								MoveToPlayView(); 
 							}
 						}
@@ -810,7 +824,7 @@ function Update ()
 							PinchOut = true;
 							if (LevelPaused) 
 							{
-								StopAllCoroutines();
+								//StopAllCoroutines();
 								MoveToPlayView(); 
 							}
 						}
@@ -822,7 +836,7 @@ function Update ()
 							PinchOut = true; 
 							if (LevelPaused) 
 							{
-								StopAllCoroutines();
+								//StopAllCoroutines();
 								MoveToPlayView(); 
 							}
 						}
@@ -1304,6 +1318,7 @@ function LevelSelect()
 	
 	if (PlatformPC)
 	{
+		print(LevelOffset);
 		//selecting level select objects
 		if(Input.GetMouseButtonDown(0))
 		{
@@ -1381,22 +1396,22 @@ function LevelSelect()
 					 
 					MovementControllerOldPos = LevelOffset;
 					//limit movement 
-					if (LevelSelectMovementController.transform.position.x + (touch.deltaPosition.x * Time.deltaTime) * LevelSelectDragRate < 8) //left side 
+					if (LevelSelectMovementController.transform.position.x + (touch.deltaPosition.x * Time.deltaTime) * LevelSelectDragRate < 0) //left side 
 					{ 
 						LevelOffset.x += (touch.deltaPosition.x * Time.deltaTime) * LevelSelectDragRate;
 					}
 					else 
 					{ 
-						LevelOffset.x = 8; 
+						LevelOffset.x = 0; 
 						return; //then kick out
 					}
-					if (LevelSelectMovementController.transform.position.x + (touch.deltaPosition.x * Time.deltaTime) * LevelSelectDragRate > -120) //right side
+					if (LevelSelectMovementController.transform.position.x + (touch.deltaPosition.x * Time.deltaTime) * LevelSelectDragRate > -146) //right side
 					{ 
 						LevelOffset.x += (touch.deltaPosition.x * Time.deltaTime) * LevelSelectDragRate;
 					}
 					else 
 					{
-						LevelOffset.x += -120; 
+						LevelOffset.x += -146; 
 						return; //kick out
 					}
 						
@@ -1415,7 +1430,7 @@ function LevelSelect()
 			if (Touch1Move)
 			{				
 				//limit movement
-				if (LevelOffset.x - Movement1Delta.x < 8) //left side
+				if (LevelOffset.x - Movement1Delta.x < 0) //left side
 				{ 
 					LevelOffset.x -= (Movement1Delta.x);
 				}
@@ -1423,14 +1438,14 @@ function LevelSelect()
 				{
 					//end the flick
 					print("limiting and ending the flick now");
-					LevelOffset.x = 8;
+					LevelOffset.x = 0;
 					
 					Touch1StartPos = Vector2(0,0);
 					Touch1EndPos = Vector2(1000,1000);		
 					Movement1Delta.x = 0;
 					Touch1Move = false;
 				}
-				if (LevelOffset.x - Movement1Delta.x > -120) //right side 
+				if (LevelOffset.x - Movement1Delta.x > -146) //right side 
 				{
 					LevelOffset.x -= (Movement1Delta.x); 
 				}
@@ -1438,7 +1453,7 @@ function LevelSelect()
 				{
 					//end the flick
 					print("limiting and ending the flick");
-					LevelOffset.x = -120;
+					LevelOffset.x = -146;
 					
 					Touch1StartPos = Vector2(0,0);
 					Touch1EndPos = Vector2(1000,1000);		
@@ -1464,6 +1479,12 @@ function LevelSelect()
 			{
 				if(Physics.Raycast(Camera.main.WorldToScreenPoint(Vector3(Touch1StartPos.x,Touch1StartPos.y,Camera.main.transform.position.z)), Camera.main.ScreenToWorldPoint(Vector3(Touch1StartPos.x, Touch1StartPos.y, WorldZDepth - Camera.main.transform.position.z)), objectInfo))
 				{
+					//save level offset
+					print(LevelOffset);
+					leveloffsetX = LevelOffset.x;
+					leveloffsetY = LevelOffset.y;
+					leveloffsetZ = LevelOffset.z;
+					
 					//Level is set to the collider's name and then loaded. See "nextLevel" code in update function.
 					previousLevel = int.Parse(objectInfo.collider.transform.Find("Num").GetComponent(TextMesh).text);
 					Level = objectInfo.collider.name;
@@ -1472,6 +1493,7 @@ function LevelSelect()
 					isMenu = false;
 					inGame = true;
 					fromLSelect = true;
+					
 					//Goes back to main menu	
 					if(objectInfo.collider.name == "mainmenu")
 					{
@@ -1511,8 +1533,8 @@ function OnGUI()
 //zoom world out and pause everything. go to world view. PinchIn
 function MoveToWorldView()
 {
-//	if (canMoveToWorld)
-//	{
+	if (canMoveToWorld)
+	{
 		print("moving to world");
 		canMoveToWorld = false;
 		canMoveToPlay = true;
@@ -1530,14 +1552,14 @@ function MoveToWorldView()
 		
 		LevelPaused = true;
 		CanZoom = false;
-	//}
+	}
 }
 
 //zoom world in and play everything. go to play view. PinchOut
 function MoveToPlayView()
 {	
-//	if (canMoveToPlay)
-//	{
+	if (canMoveToPlay)
+	{
 		print("moving to play");
 		canMoveToPlay = false;
 		canMoveToWorld = true;
@@ -1551,7 +1573,7 @@ function MoveToPlayView()
 		
 		LevelPaused = false;
 		CanZoom = true;
-//	}
+	}
 }
 
 //push the camera around when dragging planets
@@ -1649,6 +1671,7 @@ function MoveTo(time : float, target : Vector3)
 			}
 			else
 			{
+				print("moving");
 				transform.position.x += xRate * Time.deltaTime;
 				transform.position.y += yRate * Time.deltaTime;
 				transform.position.z += zRate * Time.deltaTime;
@@ -1668,6 +1691,7 @@ function MoveTo(time : float, target : Vector3)
 			}
 			else
 			{
+				print("moving");
 				transform.position.x += xRate * Time.deltaTime;
 				transform.position.y += yRate * Time.deltaTime;
 				transform.position.z += zRate * Time.deltaTime;
