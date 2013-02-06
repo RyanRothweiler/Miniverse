@@ -138,6 +138,7 @@ public var PeoplePoof : GameObject; //the PeoplePoof particle effect
 public var PausePlane : GameObject; //the pause plane which will show when zoomed out
 public var FailType : TextMesh; //the type which shows on level fail
 public var StarStreakMat : Material;
+public var KeyMat : Material; //the material used for the keys
 
 
 
@@ -193,6 +194,7 @@ private var levelWon = false;
 private var ZoomVirgin = true;
 private var canMoveToWorld = true; //if can zoom to world
 private var canMoveToPlay = false; //if can zoom to play
+private var tagPressed = false; //if a level tag has been pressed or not
 
 //Strings
 private var Level : String;
@@ -294,8 +296,14 @@ function Start ()
 		isMenu = false;
 	}
 	
-	//level select instant zoom
-	if (isLevelSelect) {
+	//level select init
+	if (isLevelSelect) 
+	{
+		//key fading
+		KeyMat.color.a = 0;
+		FadeInKeys();
+		
+		//instant zoom
 		transform.position.z = camZStopPos;
 	}
 	
@@ -330,9 +338,10 @@ function Start ()
 	peopleGoal = personObjects.length;
 	peopleAlive = personObjects.length;
 	
-	//scale down scene
-	if (!isLevelSelect) {
-		SceneScaleController.transform.localScale = Vector3(0,0,0);
+	//scale down
+	if (!isLevelSelect) 
+	{
+		SceneScaleController.transform.localScale = Vector3(0,0,0); 
 	}
 	
 	//set platform and platform specific settings
@@ -346,14 +355,14 @@ function Start ()
 	}
 	else
 	{
-		print("IOS");
-		DragRate = 0.02;
-		WorldDraggingInverted = false;
-		PlatformIOS = true;
-		PlatformPC = false;
-//		print("PC");
-//		PlatformPC = true;
-//		PlatformIOS = false;
+//		print("IOS");
+//		DragRate = 0.02;
+//		WorldDraggingInverted = false;
+//		PlatformIOS = true;
+//		PlatformPC = false;
+		print("PC");
+		PlatformPC = true;
+		PlatformIOS = false;
 	}
 	
 	//ios initializations
@@ -1020,7 +1029,7 @@ function Update ()
 	//if the level has been beat
 	if (nextLevel)
 	{
-		if(inGame && !fromLSelect)
+		if(inGame && !fromLSelect) //moving back to level select
 		{
 			isPlayOne = true;
 			ZoomIn();
@@ -1032,7 +1041,7 @@ function Update ()
 				Application.LoadLevel("levelselect"); 
 			}
 		}
-		else
+		else //moving to level
 		{
 			Camera.main.GetComponent(LevelNumberTypeEffect).SendMessage("TypeAway");
 			if (Camera.main.GetComponent(LevelNumberTypeEffect).NextLevelReady)
@@ -1052,6 +1061,24 @@ function Update ()
 	}
 }
 
+function FadeOutKeys()
+{
+	do
+	{
+		KeyMat.color.a -= Time.deltaTime * 2;
+		yield WaitForSeconds(0.01);
+	} while (KeyMat.color.a > 0);
+}
+
+function FadeInKeys()
+{
+	do
+	{
+		KeyMat.color.a += Time.deltaTime * 2;
+		yield WaitForSeconds(0.01);
+	} while (KeyMat.color.a < 1);
+}
+
 function SetNextLevel()
 {
 	sS.b = bTime;
@@ -1067,7 +1094,7 @@ function MovePeople(Asteroid : boolean)
 	//Get the childCount and store it in num
 	num = selectedWorld.transform.childCount;
 	n = 0;
-		
+	
 	//find how many children are already on the planet being moved to
 	dummyNum = 0;
 	if (!Asteroid)
@@ -1104,6 +1131,7 @@ function MovePeople(Asteroid : boolean)
 		if (selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform.gameObject.name == "humanShip")
 		{
 			peopleSaved += n;
+			selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform.Find("PeopleCounter").GetComponent(PeopleCounter).Increment(n); 
 		}
 	}
 	else
@@ -1111,6 +1139,7 @@ function MovePeople(Asteroid : boolean)
 		if (selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet.transform.gameObject.name == "humanShip")
 		{
 			peopleSaved += n;
+			selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform.Find("PeopleCounter").GetComponent(PeopleCounter).Increment(n); 
 		}
 	}
 }
@@ -1318,17 +1347,54 @@ function LevelSelect()
 	
 	if (PlatformPC)
 	{
-		print(LevelOffset);
 		//selecting level select objects
 		if(Input.GetMouseButtonDown(0))
 		{
 			if(Physics.Raycast(Camera.main.WorldToScreenPoint(Vector3(Input.mousePosition.x,Input.mousePosition.y,Camera.main.transform.position.z)), Camera.main.ScreenToWorldPoint(Vector3(Input.mousePosition.x, Input.mousePosition.y, WorldZDepth - Camera.main.transform.position.z)), objectInfo))
 			{
-				//if a level tag
-				if (objectInfo.collider.tag == "LevelTag" && (objectInfo.collider.transform.Find("Num").GetComponent(TextMesh).text != "BOSS LEVEL"))
+				if (objectInfo.collider.tag == "LevelTag")
 				{
-					//Level is set to the collider's name and then loaded. See "nextLevel" code in update function.
-					previousLevel = int.Parse(objectInfo.collider.transform.Find("Num").GetComponent(TextMesh).text);
+					//print(objectInfo.collider.name);					
+					if (objectInfo.collider.name == "boss level - 900,000")
+					{
+						if (!camera.main.GetComponent(KeyLockingController).Locked)
+						{
+							tagPressed = true;
+							DepressLevelTag(objectInfo);
+						}
+						else
+						{
+							print("locked");
+						}
+					}
+					else
+					{
+						tagPressed = true;
+						DepressLevelTag(objectInfo);
+					}
+				}
+			}
+		}
+		//when letting go of the mouse then do stuff
+		if (Input.GetMouseButtonUp(0) && objectInfo.collider.tag == "LevelTag")
+		{
+			StopAllCoroutines();
+			if (tagPressed)
+			{
+				UnpressLevelTag(objectInfo);
+			}
+			//reset tag pressed
+			tagPressed = false; 
+			
+			//check boss level
+			if (objectInfo.collider.transform.Find("Num").GetComponent(TextMesh).text == "BOSS LEVEL")
+			{
+				if (!this.GetComponent(KeyLockingController).Locked)
+				{
+					FadeOutKeys(); //fade out keys
+					
+					//initialize information for next go around
+					previousLevel = 20;
 					Level = objectInfo.collider.name;
 					PrevLevelLoc = LevelSelectMovementController.transform.position;
 					LevelOffset = Vector3.zero;
@@ -1338,30 +1404,31 @@ function LevelSelect()
 					inGame = true;
 					fromLSelect = true;
 				}
-				else if(objectInfo.collider.tag == "LevelTag" && objectInfo.collider.transform.Find("Num").GetComponent(TextMesh).text == "BOSS LEVEL") //check boss level
+				else
 				{
-					if (!this.GetComponent(KeyLockingController).Locked)
-					{
-						previousLevel = 20;
-						Level = objectInfo.collider.name;
-						PrevLevelLoc = LevelSelectMovementController.transform.position;
-						LevelOffset = Vector3.zero;
-						nextLevel = true;
-						isLevelSelect = false;
-						isMenu = false;
-						inGame = true;
-						fromLSelect = true;
-					}
-					else
-					{
-						print("locked");
-					}
+					print("locked");
 				}
+			}
+			else //if not boss level then load like a normal level
+			{
+				FadeOutKeys(); //fade out keys
+				
+				//Level is set to the collider's name and then loaded. See "nextLevel" code in update function.
+				previousLevel = int.Parse(objectInfo.collider.transform.Find("Num").GetComponent(TextMesh).text);
+				Level = objectInfo.collider.name;
+				PrevLevelLoc = LevelSelectMovementController.transform.position;
+				LevelOffset = Vector3.zero;
+				nextLevel = true;
+				isLevelSelect = false;
+				isMenu = false;
+				inGame = true;
+				fromLSelect = true;
 			}
 		}
 
 		//for horizontal scrolling
 		LevelOffset.x += Input.GetAxis("Mouse ScrollWheel") * Time.deltaTime * 1000;
+		
 	}
 	
 	if (PlatformIOS)
@@ -1388,7 +1455,9 @@ function LevelSelect()
 				}
 				//check if a tap, if not then a drag
 				if ((Touch1StartPos.x + TouchTapBounds.x > Touch1EndPos.x) && (Touch1StartPos.x - TouchTapBounds.x < Touch1EndPos.x) && (Touch1StartPos.y + TouchTapBounds.y > Touch1EndPos.y) && (Touch1StartPos.y - TouchTapBounds.y < Touch1EndPos.y))
+				{
 					Touch1Tap = true;
+				}
 				else if (Touch1StartPos.y < 250) //if a move and on the bottom half of the screen
 				{						
 					Touch1Move = true;
@@ -1479,6 +1548,8 @@ function LevelSelect()
 			{
 				if(Physics.Raycast(Camera.main.WorldToScreenPoint(Vector3(Touch1StartPos.x,Touch1StartPos.y,Camera.main.transform.position.z)), Camera.main.ScreenToWorldPoint(Vector3(Touch1StartPos.x, Touch1StartPos.y, WorldZDepth - Camera.main.transform.position.z)), objectInfo))
 				{
+					FadeOutKeys(); //fade out keys
+					
 					//save level offset
 					print(LevelOffset);
 					leveloffsetX = LevelOffset.x;
@@ -1587,11 +1658,6 @@ function CameraViewPlanetPushing()
 			//get view coordinates
 			dummyVector2 = Camera.main.WorldToScreenPoint(selectedWorld.transform.position);
 			
-			
-			//print(Camera.main.pixelWidth / 2);
-			//print((Camera.main.pixelWidth / 2) + PlanetPushBuffer.x);
-			//print(dummyVector2.x);
-			
 			//left
 			if (dummyVector2.x < ((Camera.main.pixelWidth / 2) - PlanetPushBuffer.x))
 			{
@@ -1647,8 +1713,15 @@ function LevelWon()
 	if (!levelWon)
 	{
 		levelWon = true;
+		
+		//wait a bit
+		yield WaitForSeconds(1);
+		
+		//start level winning type
+		FailType.GetComponent(TextTypeEffect).ParentCheck = false;
 		FailType.GetComponent(TextTypeEffect).TextToType = "LEVEL WON";
 		FailType.GetComponent(TextTypeEffect).Done = false;
+		FailType.transform.parent = null; //unparent
 	}
 }
 
@@ -1701,4 +1774,48 @@ function MoveTo(time : float, target : Vector3)
 		transform.position = target;
 		return;
 	}
+}
+
+function DepressLevelTag(info : RaycastHit) //depress a level tag
+{
+	FadeLevelTagSize(true, info.collider.transform.localScale.x);
+	info.collider.transform.Find("Num").renderer.material.color.a = 0.4; //number
+	info.collider.transform.Find("Name").renderer.material.color.a = 0.4; //name
+	if(!info.collider.name == "boss level - 900,000") //if not boss level then depress time
+	{
+		info.collider.transform.Find("Time").renderer.material.color.a = 0.4; //time
+	}
+	info.collider.transform.Find("CompletedPlane").renderer.material.color.a = 0.4; //completed plane
+}
+
+function UnpressLevelTag(info : RaycastHit) //unpress a level tag. set it back to its normal state
+{
+	info.collider.transform.localScale = Vector3(info.collider.transform.localScale.x + 0.15, info.collider.transform.localScale.y + 0.15, info.collider.transform.localScale.z + 0.15); //tag scale
+	info.collider.transform.Find("Num").renderer.material.color.a = 1; //number
+	info.collider.transform.Find("Name").renderer.material.color.a = 1; //name
+	if(!info.collider.name == "boss level - 900,000") //if not boss level then depress time
+	{
+		info.collider.transform.Find("Time").renderer.material.color.a = 1; //time
+	}
+	info.collider.transform.Find("CompletedPlane").renderer.material.color.a = 1; //completed plane
+}
+
+function FadeLevelTagSize(reduce : boolean, startSize : float)
+{
+	if (reduce) //reduce the size
+	{
+		do
+		{
+			objectInfo.collider.transform.localScale = Vector3(objectInfo.collider.transform.localScale.x - 0.05, objectInfo.collider.transform.localScale.y - 0.05, objectInfo.collider.transform.localScale.z - 0.05); //tag scale
+			yield WaitForSeconds(0.0001);
+		} while (objectInfo.collider.transform.localScale.x > startSize - 0.15);
+	}
+//	else //increase the size
+//	{
+//		do
+//		{
+//			objectInfo.collider.transform.localScale = Vector3(objectInfo.collider.transform.localScale.x + 0.01, objectInfo.collider.transform.localScale.y + 0.01, objectInfo.collider.transform.localScale.z + 0.01); //tag scale
+//			yield WaitForSeconds(0.0001);
+//		} while (objectInfo.collider.transform.localScale.x > 2);
+//	}
 }

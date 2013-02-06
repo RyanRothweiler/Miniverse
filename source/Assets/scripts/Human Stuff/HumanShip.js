@@ -98,6 +98,9 @@ function SwitchParticles()
 
 function FlyAway()
 {
+	//wait a bit
+	yield WaitForSeconds(0.5);
+	
 	//start fire
 	FlameEffect.GetComponent(ParticleSystem).enableEmission = true; //enable flames
 	FlameEffect.GetComponent(ParticleSystem).startSpeed  = 7; //enable flames
