@@ -1,82 +1,3 @@
-/*
-Change Log:
-
-June 25 - Devon
-Removed selectedWorld.transform.position.z = WorldZDepth because I changed 1 other line of code to fix dragging
-Dragging now uses the ScreenToWorldPoint argument thingy to determine the mouse position and where the world
-needs to be based on the screen position.
-Ran into a small issue with the world jumping back on the Z axis but I quickly figured out that it was just because
-the world's z depth was also getting the camera's z depth added to it because of the change in how we determine the
-world's position.
-
-
-July 5 - Ryan
-commented out gui and level loading
-
-July 19 - Ryan
-commented out devons depth check array.
-
-July 22 - Ryan
-Cleaned everything up and removed all unecessary comments.
-Started work on clicking to move people to closest planet
-
-July 23 - Ryan
-Added zoomspeed to control.. well.. the zoom speed when the players zooms in and out.
-Removed lose condition and 'removal of dead people'
-also started work on camera exiting. aka zooming in when the level is beat to load the next level. so instead of using fov the camera changes position
-reorganzed variables aswell. :3
-
-July 26 - Devon
-Started work on sun radii shrinking
-Finished? work on sun radii shrinking
-^Still needs to shrink the radii, will fix after code thus far is proven to work
-Started work on asteroids
-
-Just a note on naming conventions
-^Scripts will be capitals for first letters so DragControlsPC or PlanetSearcher
-^Variables will be what they have been lowercase then uppercase selectLine objectInfo
-^Preferably if we can keep actual objects and models and those real shit in all lowercase would be nice but those don't matter so much
-
-Finished work on asteroids
-Started work on people flying around a planet
-Started work on people flying to planets
-
-People Orbit planets too far away
-People flying to planets will need a loop and it does some wierd shinanigans atm too...just moves into oblivion
-
-July 27 - Ryan
-removed CamFOVZoomSpeed. It was doing nothing.
-
-July 29 - Ryan
-removed SunDist. It was doing nothing.
-
-August 2 - Ryan
-FOR ALL INTENTS AND PURPOSES ICOPHERE means asteroid. Not literally.. but well... if you're confused just ask me. Its not easy to explain.
-
-August 6 - Ryan
-More fucking variable shit trying to get it to work on ios. #pragma strict will be the death of me.
-
-August 20 - Devon
->Work finished on people Orbitting & people flying between planets 
->Fixed level win conditions and transition issues
-
->Started work on debris field functionality
->Starting work on touch controls
-
-August 22 - Devon
->Can't say I fixed it, but some problem with dragging ended *shrug*
->Also, Idk what the fuck happened with all your shit but there were just a bunch of problems that I fixed up
-Everything appears to be mostly in working order although I need to get people moving working again.
-I think some of the problems stemmed from the fact you were parent EVERYTHING in the scene to the scene scale controller then when you detached it all it just created a ton of
-separate objects. So I made it so that it doesn't make all those separate objects and keeps it in their respective heirachies. But
-I had to change how you were creating the lists slightly so its back to the older way of doing it but I think it's
-perfectly fine and it runs now so meh...
->Made the reparenting of people more efficient.
->Cleaned things up a bit
->Updating everything to .r53 as of today
-*/
-
-
 #pragma strict
 
 //public vars
@@ -115,6 +36,7 @@ public var Transitioning = false; //if the level is in transition or not
 public var LevelLost = false; //triggered by lose condition
 public var FlyAway = false; //flying the spaceship away to the next level
 public var StartZoomedOut = true; //if the level starts in the paused zoomed out view or the play view
+public var levelWon = false;
 
 public var Phase1 = false;
 public var Phase2 = false;
@@ -122,6 +44,9 @@ public var Phase3 = false;
 
 public var PlatformIOS = false;
 public var PlatformPC = false;
+
+public var canMoveToWorld = true; //if can zoom to world
+public var canMoveToPlay = false; //if can zoom to play
 
 public var ZoomSpeed = 25; //speed which player controls zoom
 public var CamFOVStop = 39; //the field of vision to stop at when the camera is zooming in during the level intro transition
@@ -161,9 +86,9 @@ private var x : int;
 private var j : int;
 private var num : int;
 private var dummyNum : int;
-public var xRate : int; //rate of movement in x axis (used for MoveTo())
-public var yRate : int; //rate of movement in y axis
-public var zRate : int; //rate of movement in z axis
+private var xRate : int; //rate of movement in x axis (used for MoveTo())
+private var yRate : int; //rate of movement in y axis
+private var zRate : int; //rate of movement in z axis
 
 //array
 private var objects : GameObject[];
@@ -190,10 +115,7 @@ static var fromLSelect : boolean;
 private var buttonPushed = false;//if the back button was pushed
 private var CanZoom = true; //if the level can level transition zoom
 private var LevelFirst = true;
-private var levelWon = false;
 private var ZoomVirgin = true;
-private var canMoveToWorld = true; //if can zoom to world
-private var canMoveToPlay = false; //if can zoom to play
 private var tagPressed = false; //if a level tag has been pressed or not
 
 //Strings
@@ -205,7 +127,6 @@ private var selectedPlanet : Transform;
 private var mousePos : Vector3;
 private var offSet : Vector3;
 private var worldScreenPoint : Vector3;
-var tinyWorldGUI : GUISkin; //The GUIskin for the UI elements
 private var shrinkCode : ShrinkCode;
 private var flyingPeople : FlyingPeople;
 private var radiiBall : Transform;
@@ -280,6 +201,13 @@ function Start ()
 	{
 		shipLoc = GameObject.Find("humanShip").transform.position;
 	}
+	
+	if (StartZoomedOut)
+	{
+		LevelPaused = true;
+	}
+	
+	cameraZoomInPos = transform.Find("ZoomInInit").transform.position;
 	
 	//center scale controller
 	SceneScaleController.transform.position = Vector3(this.transform.position.x, this.transform.position.y, SceneScaleController.transform.position.z);
@@ -993,7 +921,9 @@ function Update ()
 			PausePlane.GetComponent(TextTypeEffect).Done = false; 
 			PausePlane.GetComponent(TextTypeEffect).TextToType = "PAUSED";
 			
-			cameraZoomInPos = Vector3(shipLoc.x, shipLoc.y, CameraLocDepth);
+			//set z for zoom in pos
+			cameraZoomInPos.z = CameraLocDepth;
+		
 			LevelPaused = true;
 			CanZoom = false;
 		}
@@ -1115,6 +1045,11 @@ function MovePeople(Asteroid : boolean)
 		{
 			if (!Asteroid)
 			{
+				//if moving to the human ship then turn hide the person
+				if (selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform.gameObject.name == "humanShip")
+				{
+					selectedWorld.transform.GetChild(i).gameObject.SetActiveRecursively(false);
+				}
 				ReparentChild(selectedWorld.transform.GetChild(i).gameObject, (-15 * n) + (dummyNum * -15), false);
 			}
 			else
@@ -1131,7 +1066,7 @@ function MovePeople(Asteroid : boolean)
 		if (selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform.gameObject.name == "humanShip")
 		{
 			peopleSaved += n;
-			selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform.Find("PeopleCounter").GetComponent(PeopleCounter).Increment(n); 
+			Camera.main.transform.Find("PeopleCounter").GetComponent(PeopleCounter).Increment(n);
 		}
 	}
 	else
@@ -1139,7 +1074,7 @@ function MovePeople(Asteroid : boolean)
 		if (selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet.transform.gameObject.name == "humanShip")
 		{
 			peopleSaved += n;
-			selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform.Find("PeopleCounter").GetComponent(PeopleCounter).Increment(n); 
+			Camera.main.transform.Find("PeopleCounter").GetComponent(PeopleCounter).Increment(n); 
 		}
 	}
 }
@@ -1240,11 +1175,11 @@ function ZoomIn ()
 	NebulaBackground.transform.parent = this.transform;
 	
 	//transition stars
-	if (StarStreakMat.GetColor("_TintColor").a < 0.4)
-	{
-		StarStreakMat.SetColor("_TintColor",Color(StarStreakMat.GetColor("_TintColor").r, StarStreakMat.GetColor("_TintColor").g, StarStreakMat.GetColor("_TintColor").b, StarStreakMat.GetColor("_TintColor").a + 0.013));
-	}
-	TransitionStars.transform.position.z -= 2;
+//	if (StarStreakMat.GetColor("_TintColor").a < 0.4)
+//	{
+//		StarStreakMat.SetColor("_TintColor",Color(StarStreakMat.GetColor("_TintColor").r, StarStreakMat.GetColor("_TintColor").g, StarStreakMat.GetColor("_TintColor").b, StarStreakMat.GetColor("_TintColor").a + 0.013));
+//	}
+	//TransitionStars.transform.position.z -= 2;
 	
 	//move the camera in
 	transform.position.z += CameraPositionSpeed * Time.deltaTime;
@@ -1606,7 +1541,6 @@ function MoveToWorldView()
 {
 	if (canMoveToWorld)
 	{
-		print("moving to world");
 		canMoveToWorld = false;
 		canMoveToPlay = true;
 		
@@ -1631,7 +1565,6 @@ function MoveToPlayView()
 {	
 	if (canMoveToPlay)
 	{
-		print("moving to play");
 		canMoveToPlay = false;
 		canMoveToWorld = true;
 		
@@ -1744,7 +1677,6 @@ function MoveTo(time : float, target : Vector3)
 			}
 			else
 			{
-				print("moving");
 				transform.position.x += xRate * Time.deltaTime;
 				transform.position.y += yRate * Time.deltaTime;
 				transform.position.z += zRate * Time.deltaTime;
@@ -1764,7 +1696,6 @@ function MoveTo(time : float, target : Vector3)
 			}
 			else
 			{
-				print("moving");
 				transform.position.x += xRate * Time.deltaTime;
 				transform.position.y += yRate * Time.deltaTime;
 				transform.position.z += zRate * Time.deltaTime;
@@ -1781,10 +1712,11 @@ function DepressLevelTag(info : RaycastHit) //depress a level tag
 	FadeLevelTagSize(true, info.collider.transform.localScale.x);
 	info.collider.transform.Find("Num").renderer.material.color.a = 0.4; //number
 	info.collider.transform.Find("Name").renderer.material.color.a = 0.4; //name
-	if(!info.collider.name == "boss level - 900,000") //if not boss level then depress time
-	{
+	//if (objectInfo.collider.transform.Find("Num").GetComponent(TextMesh).text == "BOSS LEVEL"
+//	if(!info.collider.transform.Find("Num").GetComponent(TextMesh).text == "locked") //if not boss level then depress time
+//	{
 		info.collider.transform.Find("Time").renderer.material.color.a = 0.4; //time
-	}
+//	}
 	info.collider.transform.Find("CompletedPlane").renderer.material.color.a = 0.4; //completed plane
 }
 
@@ -1793,10 +1725,10 @@ function UnpressLevelTag(info : RaycastHit) //unpress a level tag. set it back t
 	info.collider.transform.localScale = Vector3(info.collider.transform.localScale.x + 0.15, info.collider.transform.localScale.y + 0.15, info.collider.transform.localScale.z + 0.15); //tag scale
 	info.collider.transform.Find("Num").renderer.material.color.a = 1; //number
 	info.collider.transform.Find("Name").renderer.material.color.a = 1; //name
-	if(!info.collider.name == "boss level - 900,000") //if not boss level then depress time
-	{
+//	if(!info.collider.name == "locked") //if not boss level then depress time
+//	{
 		info.collider.transform.Find("Time").renderer.material.color.a = 1; //time
-	}
+//	}
 	info.collider.transform.Find("CompletedPlane").renderer.material.color.a = 1; //completed plane
 }
 

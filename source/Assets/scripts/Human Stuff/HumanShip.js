@@ -3,6 +3,7 @@
 //public vars
 public var FlameEffect : GameObject;
 public var FlameSmokeEffect : GameObject;
+static var Gone = false; //if the ship has gone or not. to start the ship has not
 
 //private var
 private var oldPos : Vector3;
@@ -14,9 +15,19 @@ private var i : int;
 private var cont = true;
 
 function Start () 
-{
-	//hide ship
-	HideShip();
+{	
+	//if not gone then hide ship
+	if (!Gone)
+	{
+		HideShip();
+	}
+	else //else move ship to playing position and hide flames
+	{
+		animation["Intro"].time = 4.6;
+		//hide flames
+		FlameEffect.GetComponent(ParticleSystem).enableEmission = false;
+		introDone = true;
+	}
 	
 	//setup particle effects
 	FlameSmokeEffect.GetComponent(ParticleSystem).enableEmission = false;
@@ -32,14 +43,14 @@ function Start ()
 function Update () 
 {
 	//animation pausing
-//	if (!DragControls.LevelPaused)
-//	{
-//		animation["Idle"].speed = 1;
-//	}
-//	else
-//	{
-//		animation["Idle"].speed = 0;
-//	}
+	if (!DragControls.LevelPaused)
+	{
+		animation["Idle"].speed = 1;
+	}
+	else
+	{
+		animation["Idle"].speed = 0;
+	}
 
 	//idle
 	if (animation["Intro"].time > 4.5 && !idleStart)
@@ -52,8 +63,9 @@ function Update ()
 	}
 	
 	//intro
-	if (transform.parent.parent == null && !introDone)
+	if (!Gone && transform.parent.parent == null && !introDone)
 	{
+		Gone = true;
 		ShowShip();
 		introDone = true;
 		animation.Play("Intro");
@@ -98,6 +110,8 @@ function SwitchParticles()
 
 function FlyAway()
 {
+	Gone = false; //the spaceship has gone and moving to next level so reset
+	
 	//wait a bit
 	yield WaitForSeconds(0.5);
 	

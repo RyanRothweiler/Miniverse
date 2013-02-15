@@ -1,9 +1,11 @@
 #pragma strict
 
 //public vars
+public var cont = false;
 
 //private vars
 private var planetsearcher : PlanetSearcher;
+private var dragControls : DragControlsPC;
 
 private var touchGo = true;
 private var dragGo = false;
@@ -12,12 +14,14 @@ private var tapGo = false;
 private var i : int;
 private var x : int;
 private var str : String;
-public var cont = false;
+
+private var levelWonGone = false;
 
 function Start () 
 {
-	//get planet controller
+	//get other objects
 	planetsearcher = transform.parent.GetComponent(PlanetSearcher);
+	dragControls = Camera.main.GetComponent(DragControlsPC);
 }
 
 function Update () 
@@ -28,7 +32,7 @@ function Update ()
 	//tutorial level things
 	if (planetsearcher.nearestPlanet != null && cont)
 	{
-		if (!planetsearcher.Selected && planetsearcher.nearestPlanet.name != "humanShip")
+		if (!planetsearcher.Selected && planetsearcher.nearestPlanet.name != "humanShip" && !levelWonGone)
 		{
 			if (touchGo)
 			{
@@ -39,7 +43,7 @@ function Update ()
 				tapGo = true;
 			}
 		}
-		if (planetsearcher.Selected && planetsearcher.nearestPlanet.name != "humanShip")
+		if (planetsearcher.Selected && planetsearcher.nearestPlanet.name != "humanShip" && !levelWonGone)
 		{
 			if (dragGo)
 			{
@@ -50,7 +54,7 @@ function Update ()
 				tapGo = true;
 			}
 		}
-		if (planetsearcher.Selected && planetsearcher.nearestPlanet.name == "humanShip")
+		if (planetsearcher.Selected && planetsearcher.nearestPlanet.name == "humanShip" && !levelWonGone)
 		{
 			if (tapGo)
 			{
@@ -61,6 +65,14 @@ function Update ()
 				dragGo = true;
 			}
 		}
+	}
+	
+	//if level beat
+	if (dragControls.levelWon && !levelWonGone)
+	{
+		levelWonGone = true;
+		StopAllCoroutines();
+		Type(" ");
 	}
 }
 

@@ -5,15 +5,22 @@ public var TextToType : String;
 public var waitTime : float;
 public var Done = false;
 public var ParentCheck = true;
+public var FadeOutOnWin = false;
 
 //private vars
+private var dragControls : DragControlsPC;
+
+private var mat : Material;
 private var i : int;
 private var x : int;
 private var str : String;
+private var levelWon = false;
 
 function Start () 
 {
-
+	//get things
+	dragControls = Camera.main.GetComponent(DragControlsPC);
+	mat = renderer.material;
 }
 
 function Update () 
@@ -30,6 +37,13 @@ function Update ()
 		Done = true;
 		StopAllCoroutines();
 		Type(TextToType);
+	}
+	
+	//check if the level is won
+	if (dragControls.levelWon && !levelWon && FadeOutOnWin)
+	{
+		levelWon = true;
+		FadeOut();
 	}
 }
 
@@ -53,4 +67,13 @@ function Type(text : String) //an effect of typing in something
 		GetComponent(TextMesh).text = str;
 		yield WaitForSeconds(0.05);
 	}
+}
+
+function FadeOut()
+{
+	do
+	{
+		mat.color.a -= 0.008;
+		yield;
+	} while (mat.color.a > 0.2);
 }

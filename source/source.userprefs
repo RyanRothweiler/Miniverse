@@ -1,11 +1,11 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\scripts\UI Stuff\PeopleCounter.js">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\scripts\Sun Stuff\ShrinkCode.js">
     <Files>
-      <File FileName="Assets\scripts\UI Stuff\PeopleCounter.js" Line="27" Column="21" />
-      <File FileName="Assets\scripts\Control Stuff\DragControlsPC.js" Line="1723" Column="19" />
-      <File FileName="Assets\scripts\Human Stuff\HumanShip.js" Line="101" Column="14" />
-      <File FileName="Assets\scripts\UI Stuff\TextTypeEffect.js" Line="29" Column="3" />
+      <File FileName="Assets\scripts\Sun Stuff\ShrinkCode.js" Line="27" Column="33" />
+      <File FileName="Assets\scripts\Control Stuff\DragControlsPC.js" Line="207" Column="22" />
+      <File FileName="Assets\scripts\UI Stuff\LevelWinText.js" Line="22" Column="28" />
+      <File FileName="Assets\scripts\Human Stuff\HumanShip.js" Line="45" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

@@ -61,7 +61,14 @@ function Update ()
 			//disable mesh renderers
 			var renderers = transform.parent.GetComponentsInChildren(Renderer);
 			for (var rendar : Renderer in renderers)
+			{
 				rendar.enabled = false;
+			}
+			//if people on that planet then level is over
+			if (renderers.Length > 6)
+			{
+				DragControls.LevelLose();
+			}
 				
 			//is dead... pay for funeral later		
 			dead = true;

@@ -8,12 +8,17 @@ public var Arrow : GameObject;
 public var AnimSpeed = 7.5;
 
 //private vars
-private var Hiding = false;
+public var Hiding = false;
 private var virgin = true;
+private var dragControls : DragControlsPC;
+private var finalHid = false;
 
 function Start () 
 {
-
+	//get drag controls
+	dragControls = Camera.main.GetComponent(DragControlsPC);
+	 
+	//initialize animation stuff
 	animation["Anim"].wrapMode = WrapMode.Once;
 	CircleMaterial.SetColor("_TintColor", Color(0,1,0,0));
 	Show();
@@ -21,11 +26,19 @@ function Start ()
 
 function Update () 
 {
+
 	if (Hiding && animation["Anim"].time == 0)
 	{
 		InnerCircle.renderer.enabled = false;
 		OuterCircle.renderer.enabled = false;
 		Arrow.renderer.enabled = false;
+	}
+	
+	//if level beat then clean up
+	if (dragControls.levelWon && !finalHid)
+	{
+		finalHid = true;
+		Hide();
 	}
 }
 
