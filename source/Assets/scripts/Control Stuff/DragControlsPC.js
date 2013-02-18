@@ -15,7 +15,8 @@ public var worldDist : float; //distance which the worlds must stay to the sun
 public var DragRate : float; //speed which player moves the world around
 public var CameraPositionSpeed : float; // the speed which the camera moves in during the level transitions
 public var CameraScaleSpeed : float; //the speed which the world scales up and down in the level transitions 
-public var LevelSelectDragRate : float; //rate at which the level select tags are drug 
+public var LevelSelectDragRate : float; //rate at which the level select tags are drug  
+public var TutorialTypeSpeed : float; //the speed at which the tutorials are typed
 
 static var leveloffsetX : float;//save level offest x position
 static var leveloffsetY : float;
@@ -117,12 +118,15 @@ private var CanZoom = true; //if the level can level transition zoom
 private var LevelFirst = true;
 private var ZoomVirgin = true;
 private var tagPressed = false; //if a level tag has been pressed or not
+private var iosTagDepress = true;  //if a tag is depressed
+private var FadeKick = false; //if kick out of the level tag fading
 
 //Strings
 private var Level : String;
 private var str : String;
 
 //other... things...
+private var depressedTag : RaycastHit;
 private var selectedPlanet : Transform;
 private var mousePos : Vector3;
 private var offSet : Vector3;
@@ -195,7 +199,8 @@ function Start ()
 	cont = false;
 	f = 0;
 	LevelOffset = Vector3.zero;
-	Timer = GetComponent(LevelTimer); //get the level timer
+	Timer = GetComponent(LevelTimer); //get the level timer 
+	TutorialTypeSpeed = 0.03;
 	
 	if (!LevelSelect)
 	{
@@ -283,14 +288,14 @@ function Start ()
 	}
 	else
 	{
-//		print("IOS");
-//		DragRate = 0.02;
-//		WorldDraggingInverted = false;
-//		PlatformIOS = true;
-//		PlatformPC = false;
-		print("PC");
-		PlatformPC = true;
-		PlatformIOS = false;
+		print("IOS");
+		DragRate = 0.02;
+		WorldDraggingInverted = false;
+		PlatformIOS = true;
+		PlatformPC = false;
+//		print("PC");
+//		PlatformPC = true;
+//		PlatformIOS = false;
 	}
 	
 	//ios initializations
@@ -990,7 +995,8 @@ function Update ()
 		shrinkCheck();
 	}
 }
-
+ 
+//fade out the keys
 function FadeOutKeys()
 {
 	do
@@ -999,7 +1005,8 @@ function FadeOutKeys()
 		yield WaitForSeconds(0.01);
 	} while (KeyMat.color.a > 0);
 }
-
+ 
+//fade in the keys
 function FadeInKeys()
 {
 	do
@@ -1009,6 +1016,7 @@ function FadeInKeys()
 	} while (KeyMat.color.a < 1);
 }
 
+//set the next level... hence the .
 function SetNextLevel()
 {
 	sS.b = bTime;
@@ -1387,6 +1395,16 @@ function LevelSelect()
 					Touch1StartPos = touch.position;
 					Touch1Start = false;
 					Touch1Move = false;
+					
+					//check for tag depression
+					if(Physics.Raycast(Camera.main.WorldToScreenPoint(Vector3(Touch1StartPos.x,Touch1StartPos.y,Camera.main.transform.position.z)), Camera.main.ScreenToWorldPoint(Vector3(Touch1StartPos.x, Touch1StartPos.y, WorldZDepth - Camera.main.transform.position.z)), objectInfo))
+					{
+						FadeKick = false;
+						DepressLevelTag(objectInfo);
+						depressedTag = objectInfo;
+						iosTagDepress = true;
+					}
+					
 				}
 				//check if a tap, if not then a drag
 				if ((Touch1StartPos.x + TouchTapBounds.x > Touch1EndPos.x) && (Touch1StartPos.x - TouchTapBounds.x < Touch1EndPos.x) && (Touch1StartPos.y + TouchTapBounds.y > Touch1EndPos.y) && (Touch1StartPos.y - TouchTapBounds.y < Touch1EndPos.y))
@@ -1394,7 +1412,14 @@ function LevelSelect()
 					Touch1Tap = true;
 				}
 				else if (Touch1StartPos.y < 250) //if a move and on the bottom half of the screen
-				{						
+				{
+					//unpress level tag
+					if (iosTagDepress)
+					{
+						iosTagDepress = false;
+						UnpressLevelTag(depressedTag);
+					}
+							
 					Touch1Move = true;
 					Touch1Tap = false;
 					 
@@ -1430,6 +1455,14 @@ function LevelSelect()
 			//reset
 			Touch1Start = true;
 			
+			//unpress level tag
+			if (iosTagDepress)
+			{
+				iosTagDepress = false;
+				FadeKick = true;
+				UnpressLevelTag(depressedTag);
+			}
+			
 			//check flicking
 			if (Touch1Move)
 			{				
@@ -1441,7 +1474,6 @@ function LevelSelect()
 				else
 				{
 					//end the flick
-					print("limiting and ending the flick now");
 					LevelOffset.x = 0;
 					
 					Touch1StartPos = Vector2(0,0);
@@ -1486,7 +1518,6 @@ function LevelSelect()
 					FadeOutKeys(); //fade out keys
 					
 					//save level offset
-					print(LevelOffset);
 					leveloffsetX = LevelOffset.x;
 					leveloffsetY = LevelOffset.y;
 					leveloffsetZ = LevelOffset.z;
@@ -1709,45 +1740,41 @@ function MoveTo(time : float, target : Vector3)
 
 function DepressLevelTag(info : RaycastHit) //depress a level tag
 {
-	FadeLevelTagSize(true, info.collider.transform.localScale.x);
-	info.collider.transform.Find("Num").renderer.material.color.a = 0.4; //number
-	info.collider.transform.Find("Name").renderer.material.color.a = 0.4; //name
-	//if (objectInfo.collider.transform.Find("Num").GetComponent(TextMesh).text == "BOSS LEVEL"
-//	if(!info.collider.transform.Find("Num").GetComponent(TextMesh).text == "locked") //if not boss level then depress time
-//	{
-		info.collider.transform.Find("Time").renderer.material.color.a = 0.4; //time
-//	}
-	info.collider.transform.Find("CompletedPlane").renderer.material.color.a = 0.4; //completed plane
+	if (info.collider.tag == "LevelTag")
+	{
+		FadeLevelTagSize(info.collider.transform.localScale.x);
+		info.collider.transform.Find("Num").renderer.material.color.a = 0.4; //number
+		info.collider.transform.Find("Name").renderer.material.color.a = 0.4; //name
+		//if (objectInfo.collider.transform.Find("Num").GetComponent(TextMesh).text == "BOSS LEVEL"
+	//	if(!info.collider.transform.Find("Num").GetComponent(TextMesh).text == "locked") //if not boss level then depress time
+	//	{
+			//info.collider.transform.Find("Time").renderer.material.color.a = 0.4; //time
+	//	}
+		info.collider.transform.Find("CompletedPlane").renderer.material.color.a = 0.4; //completed plane
+	}
 }
 
 function UnpressLevelTag(info : RaycastHit) //unpress a level tag. set it back to its normal state
 {
-	info.collider.transform.localScale = Vector3(info.collider.transform.localScale.x + 0.15, info.collider.transform.localScale.y + 0.15, info.collider.transform.localScale.z + 0.15); //tag scale
-	info.collider.transform.Find("Num").renderer.material.color.a = 1; //number
-	info.collider.transform.Find("Name").renderer.material.color.a = 1; //name
-//	if(!info.collider.name == "locked") //if not boss level then depress time
-//	{
-		info.collider.transform.Find("Time").renderer.material.color.a = 1; //time
-//	}
-	info.collider.transform.Find("CompletedPlane").renderer.material.color.a = 1; //completed plane
+	if (info.collider.tag == "LevelTag")
+	{ 
+		info.collider.transform.localScale = Vector3(2.0, 2.0, 1.0); //tag scale
+		//info.collider.transform.localScale = Vector3(info.collider.transform.localScale.x + 0.15, info.collider.transform.localScale.y + 0.15, info.collider.transform.localScale.z + 0.15); //tag scale
+		info.collider.transform.Find("Num").renderer.material.color.a = 1; //number
+		info.collider.transform.Find("Name").renderer.material.color.a = 1; //name
+	//	if(!info.collider.name == "locked") //if not boss level then depress time
+	//	{
+			//info.collider.transform.Find("Time").renderer.material.color.a = 1; //time
+	//	}
+		info.collider.transform.Find("CompletedPlane").renderer.material.color.a = 1; //completed plane
+	}
 }
 
-function FadeLevelTagSize(reduce : boolean, startSize : float)
+function FadeLevelTagSize(startSize : float)
 {
-	if (reduce) //reduce the size
+	do
 	{
-		do
-		{
-			objectInfo.collider.transform.localScale = Vector3(objectInfo.collider.transform.localScale.x - 0.05, objectInfo.collider.transform.localScale.y - 0.05, objectInfo.collider.transform.localScale.z - 0.05); //tag scale
-			yield WaitForSeconds(0.0001);
-		} while (objectInfo.collider.transform.localScale.x > startSize - 0.15);
-	}
-//	else //increase the size
-//	{
-//		do
-//		{
-//			objectInfo.collider.transform.localScale = Vector3(objectInfo.collider.transform.localScale.x + 0.01, objectInfo.collider.transform.localScale.y + 0.01, objectInfo.collider.transform.localScale.z + 0.01); //tag scale
-//			yield WaitForSeconds(0.0001);
-//		} while (objectInfo.collider.transform.localScale.x > 2);
-//	}
+		objectInfo.collider.transform.localScale = Vector3(objectInfo.collider.transform.localScale.x - 0.05, objectInfo.collider.transform.localScale.y - 0.05, objectInfo.collider.transform.localScale.z - 0.05); //tag scale 
+		yield;
+	} while (objectInfo.collider.transform.localScale.x > startSize - 0.15 && !Touch1Move && !FadeKick);
 }

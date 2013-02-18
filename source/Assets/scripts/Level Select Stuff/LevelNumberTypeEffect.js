@@ -160,7 +160,8 @@ function Type(text : String, object : GameObject) //an effect of typing in somet
 	for (i = 0; i < text.Length; i++)
 	{
 		object.GetComponent(TextMesh).text = object.GetComponent(TextMesh).text + text[i];
-		yield WaitForSeconds(0.01);
+		yield;
+		//yield WaitForSeconds(0.01);
 	}
 }
 
@@ -170,7 +171,8 @@ function UnType(text : String, object : GameObject, length : int)
 	{
 		text = text.Substring(0, text.Length - 1);
 		object.GetComponent(TextMesh).text = text;
-		yield WaitForSeconds(0.01);
+		yield;
+		//yield WaitForSeconds(0.01);
 	}
 }
 

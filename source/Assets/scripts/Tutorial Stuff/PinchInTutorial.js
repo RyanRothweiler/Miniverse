@@ -34,7 +34,7 @@ function Type(text : String) //an effect of typing in something
 	{
 		str = str.Substring(0, str.Length - 1);
 		GetComponent(TextMesh).text = str;
-		yield WaitForSeconds(0.05);
+		yield WaitForSeconds(dragControls.TutorialTypeSpeed);
 	}
 	
 	//type in new text
@@ -42,6 +42,6 @@ function Type(text : String) //an effect of typing in something
 	{
 		str = str + text[i];
 		GetComponent(TextMesh).text = str;
-		yield WaitForSeconds(0.05);
+		yield WaitForSeconds(dragControls.TutorialTypeSpeed);
 	}
 }
