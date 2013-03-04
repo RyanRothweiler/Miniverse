@@ -24,11 +24,17 @@ function Start ()
 	
 	//set material color based on degradation speed
 	if (degradationSpeed >= 35) //red
+	{
 		GetComponentInChildren(Renderer).material.SetColor("_MainColor",Color(255,0,0));
+	}
 	if (degradationSpeed >= 15 && degradationSpeed < 35) //yellow
+	{
 		GetComponentInChildren(Renderer).material.SetColor("_MainColor",Color(255,255,0));
+	}
 	if (degradationSpeed >= 0 && degradationSpeed < 15) //green
+	{
 		GetComponentInChildren(Renderer).material.SetColor("_MainColor",Color(0,255,0));
+	}
 		
 	//get drag controls script
 	DragControls = Camera.main.GetComponent(DragControlsPC);

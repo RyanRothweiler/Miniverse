@@ -62,6 +62,7 @@ public var PlanetExplosion : GameObject;
 public var LevelSelectMovementController : GameObject; //the parent for all the level select objects
 public var PeoplePoof : GameObject; //the PeoplePoof particle effect
 public var PausePlane : GameObject; //the pause plane which will show when zoomed out
+public var ZoomStreaks : GameObject; //the star streaks which show when zooming
 public var FailType : TextMesh; //the type which shows on level fail
 public var StarStreakMat : Material;
 public var KeyMat : Material; //the material used for the keys
@@ -288,14 +289,14 @@ function Start ()
 	}
 	else
 	{
-		print("IOS");
-		DragRate = 0.02;
-		WorldDraggingInverted = false;
-		PlatformIOS = true;
-		PlatformPC = false;
-//		print("PC");
-//		PlatformPC = true;
-//		PlatformIOS = false;
+//		print("IOS");
+//		DragRate = 0.02;
+//		WorldDraggingInverted = false;
+//		PlatformIOS = true;
+//		PlatformPC = false;
+		print("PC");
+		PlatformPC = true;
+		PlatformIOS = false;
 	}
 	
 	//ios initializations
@@ -417,7 +418,7 @@ function Update ()
 				if (selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).Alive)		
 					selectedWorld.transform.position = Camera.main.ScreenToWorldPoint(Vector3(Input.mousePosition.x,Input.mousePosition.y,WorldZDepth - Camera.main.transform.position.z)) + offSet;
 			}
-			//if world dragging
+			//if view dragging
 			if ( (Input.GetAxis("Horizontal") || Input.GetAxis("Vertical")) && !LevelPaused && CanViewDrag)
 			{
 				if (CanMoveCameraHorizontal)
@@ -477,11 +478,11 @@ function Update ()
 				//make sure the player clicked on a planet
 				if (Physics.Raycast(Camera.main.ScreenPointToRay(Vector3(Input.mousePosition.x, Input.mousePosition.y, WorldZDepth - Camera.main.transform.position.z)).origin, Camera.main.ScreenPointToRay(Vector3(Input.mousePosition.x, Input.mousePosition.y, WorldZDepth - Camera.main.transform.position.z)).direction, objectInfo))
 				{
-					if (objectInfo.collider.name == "Icosphere" && selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet.name != selectedWorld.collider.name) //if selected an asteroid and the asteroids nearest planet is not itself
+					if (objectInfo.collider.name == "Icosphere" && selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet != selectedWorld.collider.gameObject) //if selected an asteroid and the asteroids nearest planet is not itself
 					{	
 						//if mouse didn't move
 						if (mousePos == Input.mousePosition)
-						{		
+						{
 							MovePeople(true);
 						}
 					}
@@ -869,17 +870,20 @@ function Update ()
 							close = true;
 					}
 				}
+				
 				//if this planet is not close to anything then its dead
 				if (worldObjects[i].transform.name == "HumanPlanet" && !close)
 				{
-					//worldObjects[i].transform.DetachChildren();
-					worldSelected = false;
-					GameObject.Instantiate(PlanetExplosion, worldObjects[i].transform.position, Quaternion(0,0,0,0)); 
-					LevelLose();
-					worldObjects[i].transform.gameObject.GetComponent(PlanetSearcher).Alive = false;
-					worldObjects[i].transform.position = Vector3(1000, 1000, 1000);
-					worldObjects[i].transform.gameObject.tag = "DEAD";
-					peopleAlive -= worldObjects[i].transform.childCount;
+					//check if people on the planet to know if the level has been lost or not
+					if (worldObjects[i].transform.Find("HumanPerson") != null)
+					{
+						LevelLose();
+					}
+					
+					//clean up scene and delete planet
+					worldSelected = false; //world not selected
+					GameObject.Instantiate(PlanetExplosion, worldObjects[i].transform.position, Quaternion(0,0,0,0)); //create explosion
+					worldObjects[i].SendMessage("KillPlanet"); //kill planet
 					worldObjects = GameObject.FindGameObjectsWithTag("world"); //recreate world objects, removing the dead world
 				}
 			}
@@ -1565,6 +1569,9 @@ function OnGUI()
 			peopleGoal = 0;
 		}
 	}
+	
+	//world dragging inverting toggle
+	WorldDraggingInverted = GUI.Toggle(Rect(10,50,200,30), WorldDraggingInverted, "Invert View Dragging");
 } 
 
 //zoom world out and pause everything. go to world view. PinchIn
@@ -1572,6 +1579,12 @@ function MoveToWorldView()
 {
 	if (canMoveToWorld)
 	{
+		LevelPaused = true;
+		CanZoom = false;
+		
+		//zoom streaks
+		//ZoomStreaks.GetComponent(ZoomStarStreaks).MoveToPlanets();
+		
 		canMoveToWorld = false;
 		canMoveToPlay = true;
 		
@@ -1585,9 +1598,6 @@ function MoveToWorldView()
 		
 		//move out camera
 		yield StartCoroutine(MoveTo(0.2,CameraZoomOutPos));
-		
-		LevelPaused = true;
-		CanZoom = false;
 	}
 }
 
@@ -1596,6 +1606,12 @@ function MoveToPlayView()
 {	
 	if (canMoveToPlay)
 	{
+		LevelPaused = false;
+		CanZoom = true;
+		
+		//zoom streaks
+		//ZoomStreaks.GetComponent(ZoomStarStreaks).MoveAwayFromPlanets();
+		
 		canMoveToPlay = false;
 		canMoveToWorld = true;
 		
@@ -1605,9 +1621,6 @@ function MoveToPlayView()
 		
 		//move in camera
 		yield StartCoroutine(MoveTo(0.2,cameraZoomInPos));
-		
-		LevelPaused = false;
-		CanZoom = true;
 	}
 }
 
@@ -1617,7 +1630,7 @@ function CameraViewPlanetPushing()
 	//pc controls
 	if (PlatformPC)
 	{
-		if (worldSelected)
+		if (worldSelected && !LevelPaused)
 		{
 			//get view coordinates
 			dummyVector2 = Camera.main.WorldToScreenPoint(selectedWorld.transform.position);

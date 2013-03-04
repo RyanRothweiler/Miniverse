@@ -37,7 +37,7 @@ function Start ()
 
 function Update () 
 {
-	if (UseJoystickControls)
+	if (UseJoystickControls && !dragControls.LevelPaused)
 	{
 		//disable textures 
 		JoyStickOutsideObj.renderer.enabled = false;
@@ -95,8 +95,16 @@ function Update ()
 			}
 				
 			//use direction
-			Camera.main.transform.position += direction;
-			Home += direction;
+			if (dragControls.WorldDraggingInverted)
+			{
+				Camera.main.transform.position += direction;
+				Home += direction;
+			}
+			else
+			{
+				Camera.main.transform.position += direction * -1;
+				Home += direction * -1;
+			}
 			
 		}
 		else
@@ -104,7 +112,8 @@ function Update ()
 			Touch1Start = true;
 		}
 		
-		//if dragging camera with touch 1
+		
+		//if dragging camera with touch 2
 		if (dragControls.Touching2 && !dragControls.Touch2WorldSelected)
 		{
 			if (Touch1Start)

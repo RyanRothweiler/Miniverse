@@ -29,6 +29,7 @@ private var dummyRect : Rect;
 private var first : boolean;
 private var indicatorFirstShow = true;
 private var indicatorFirstHide = true;
+private var sunClose = false; //if close to a sun
 private var i : int;
 
 private var objectList : Component[];
@@ -124,7 +125,16 @@ function BeginSearch ()
     for (var obj : GameObject in gameObjects) 
     {
 	    distanceSqr = 0;
-	    objectPos = obj.transform.position;
+	    
+	    //get the object's position. if human ship then get the ships center not the objects center.
+	    if (obj.name == "humanShip")
+	    {
+	    	objectPos = obj.transform.Find("humanship_3_MO").position;
+	    }
+	    else
+	    {
+	    	objectPos = obj.transform.position;
+	    }
 	        
 	    //normal objects
 		if (obj.transform != this.transform && obj.name != "Asteroid")
@@ -243,3 +253,9 @@ function OnTriggerEnter(info : Collider)
 
 }
 
+function KillPlanet()
+{
+	Alive = false;
+	transform.position = Vector3(1000, 1000, 1000);
+	transform.gameObject.tag = "DEAD";
+}
