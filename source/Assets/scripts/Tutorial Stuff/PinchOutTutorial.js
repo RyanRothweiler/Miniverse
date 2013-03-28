@@ -28,7 +28,7 @@ function Update ()
 	//showing
 	if (dragControls.canMoveToPlay && ShowVirgin)
 	{
-		Type("PINCH OUT");
+		Type("DOUBLE TAP");
 		ShowVirgin = false;
 	}
 	//hiding

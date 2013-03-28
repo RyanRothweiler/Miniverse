@@ -22,14 +22,15 @@ static var leveloffsetX : float;//save level offest x position
 static var leveloffsetY : float;
 static var leveloffsetZ : float;
 
-public var WorldDraggingInverted : boolean; //if world dragging is inverted
+static var WorldDraggingInverted : boolean; //if world dragging is inverted
 public var CanMoveCameraHorizontal : boolean; //if the player can move the camera horizontally
 public var TouchAutoMove : boolean; //if true then when a planet is touched, the camera will automatically move up until the end of the level. used on the boss level
 public var sunShrink : boolean;
 public var AutoMoving = false; //boss level moving
 public var isMenu : boolean;
 public var isLevelSelect : boolean;
-public var CanScrollZoom : boolean; //if the level can scrool zoom
+public var CanScrollZoom : boolean; //if the level can scrool zoom, also pinch zoom
+public var DoubleTapZoom : boolean; //if the level can double tap / double click zoom
 public var LevelPaused : boolean; //if the level is paused. Only zoom controls work if the level is paused. 
 public var CanViewDrag : boolean; //if the player can drag the view around through touching in blank space.
 public var CameraViewPlanetPush : boolean; //if pushing a planet toward the edge of the screen then the camera moves
@@ -119,7 +120,7 @@ private var CanZoom = true; //if the level can level transition zoom
 private var LevelFirst = true;
 private var ZoomVirgin = true;
 private var tagPressed = false; //if a level tag has been pressed or not
-private var iosTagDepress = true;  //if a tag is depressed
+private var iosTagDepress = false;  //if a tag is depressed
 private var FadeKick = false; //if kick out of the level tag fading
 
 //Strings
@@ -173,6 +174,8 @@ private var dummyVect : Vector3; //a dummy vector 2
 private var MovementControllerOldPos : Vector2;
 private var PinchIn = false;
 private var PinchOut = false;
+public var tapCount = 0; //the number of taps within the tap time limit. used for detecting doubel taps
+private var tapTimeLimit = 0.3; //the time to wait unitl resetting tapCount
 
 //Level Saving/Progress/Time Specific Vars
 private static var sS : SaveStating;
@@ -283,20 +286,20 @@ function Start ()
 	{
 		print("IOS");
 		DragRate = 0.02;
-		WorldDraggingInverted = false;
+		//WorldDraggingInverted = false;
 		PlatformIOS = true;
 		PlatformPC = false;
 	}
 	else
 	{
-//		print("IOS");
-//		DragRate = 0.02;
-//		WorldDraggingInverted = false;
-//		PlatformIOS = true;
-//		PlatformPC = false;
-		print("PC");
-		PlatformPC = true;
-		PlatformIOS = false;
+		print("IOS");
+		DragRate = 0.02;
+		//WorldDraggingInverted = false;
+		PlatformIOS = true;
+		PlatformPC = false;
+//		print("PC");
+//		PlatformPC = true;
+//		PlatformIOS = false;
 	}
 	
 	//ios initializations
@@ -481,12 +484,11 @@ function Update ()
 					if (objectInfo.collider.name == "Icosphere" && selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet != selectedWorld.collider.gameObject) //if selected an asteroid and the asteroids nearest planet is not itself
 					{	
 						//if mouse didn't move
-						if (mousePos == Input.mousePosition)
+						if (mousePos == Input.mousePosition && selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet != selectedWorld.collider.gameObject)
 						{
 							MovePeople(true);
 						}
 					}
-					//print(selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.name);
 					if (objectInfo.collider.name == "HumanPlanet" && selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet != selectedWorld.collider.gameObject) //if selected a human planet
 					{
 						//if mouse didn't move
@@ -515,8 +517,29 @@ function Update ()
 					//first touch
 					if (Touch1Start)
 					{
+						//check double tapping. do this while touch1startpos still holds the last touch position
+						tapCount++;
+						TapResetWait();
+						if (tapCount >= 2 && DoubleTapZoom && (touch.position.x > Touch1StartPos.x - 20 && touch.position.x < Touch1StartPos.x + 20) && (touch.position.y > Touch1StartPos.y - 20 && touch.position.y < Touch1StartPos.y + 20)) //if double tapped then zoom into that position
+						{
+							tapCount = 0;
+							if (LevelPaused) 
+							{
+								//set the position to zoom the camera in 
+								cameraZoomInPos = Camera.main.ScreenToWorldPoint(Vector3(touch.position.x, touch.position.y, WorldZDepth - Camera.main.transform.position.z));
+								cameraZoomInPos.z = CameraLocDepth;
+								
+								MoveToPlayView();
+							}
+							else
+							{
+								MoveToWorldView();
+							}
+						}
+						
 						Touch1Start = false;
 						Touch1StartPos = touch.position;
+						
 						//planet selection
 						if (!LevelPaused && !Touch1WorldSelected && Physics.Raycast(Camera.main.WorldToScreenPoint(Vector3(touch.position.x,touch.position.y,Camera.main.transform.position.z)), Camera.main.ScreenToWorldPoint(Vector3(touch.position.x, touch.position.y, WorldZDepth - Camera.main.transform.position.z)), objectInfo))
 						{
@@ -535,6 +558,7 @@ function Update ()
 					Touch1EndPos = touch.position;
 					Touch1Delta = touch.deltaPosition;
 				}
+				//check second touch
 				if (touch.fingerId == 1)
 				{
 					//first touch
@@ -805,15 +829,22 @@ function Update ()
 					Touch1WorldSelected = false;
 				}
 				
+				//check touch location again this time for tap purposes
+				if (Physics.Raycast(Camera.main.WorldToScreenPoint(Vector3(Touch1StartPos.x,Touch1StartPos.y,Camera.main.transform.position.z)), Camera.main.ScreenToWorldPoint(Vector3(Touch1StartPos.x, Touch1StartPos.y, WorldZDepth - Camera.main.transform.position.z)), objectInfo))
+				{
+					selectedWorld = objectInfo;
+				}
+				
 				//tap moving people
 				if (Touch1Tap && objectInfo.collider != null)
-				{
-					Touch1Tap = false;
-					if (objectInfo.collider.name == "Icosphere") //if selected an asteroid
-					{					
+				{	
+					Touch1Tap = false;	
+						
+					if (selectedWorld.collider.name == "Icosphere") //if selected an asteroid
+					{			
 						MovePeople(true);
 					}
-					if (objectInfo.collider.name == "HumanPlanet") //if selected a human planet
+					if (selectedWorld.collider.name == "HumanPlanet" && selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet != selectedWorld.collider.gameObject) //if selected a human planet
 					{					
 						MovePeople(false);
 					}
@@ -838,15 +869,21 @@ function Update ()
 					Touch2WorldSelected = false;
 				}
 				
+				//check touch location again this time for tap purposes
+				if (Physics.Raycast(Camera.main.WorldToScreenPoint(Vector3(Touch1StartPos.x,Touch1StartPos.y,Camera.main.transform.position.z)), Camera.main.ScreenToWorldPoint(Vector3(Touch1StartPos.x, Touch1StartPos.y, WorldZDepth - Camera.main.transform.position.z)), objectInfo))
+				{
+					selectedWorld = objectInfo;
+				}
+				
 				//tap moving people
 				if (Touch2Tap && objectInfo.collider != null)
 				{
 					Touch2Tap = false;
-					if (objectInfo.collider.name == "Icosphere") //if selected an asteroid
+					if (selectedWorld.collider.name == "Icosphere") //if selected an asteroid
 					{
 						MovePeople(true);
 					}
-					if (objectInfo.collider.name == "HumanPlanet") //if selected a human planet
+					if (selectedWorld.collider.name == "HumanPlanet") //if selected a human planet
 					{	
 						MovePeople(false);
 					}
@@ -1033,60 +1070,63 @@ function SetNextLevel()
 //move people between objects
 function MovePeople(Asteroid : boolean)
 {
-	//Get the childCount and store it in num
-	num = selectedWorld.transform.childCount;
-	n = 0;
-	
-	//find how many children are already on the planet being moved to
-	dummyNum = 0;
-	if (!Asteroid)
+	if (canMoveToWorld)
 	{
-		dummyChildList = selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform.gameObject.GetComponentsInChildren(HumanPerson);
-	}
-	else
-	{
-		dummyChildList = selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet.transform.gameObject.GetComponentsInChildren(HumanPerson);
-	}
-	dummyNum = dummyChildList.Length;
+		//Get the childCount and store it in num
+		num = selectedWorld.transform.childCount;
+		n = 0;
 		
-		
-	//get human children and move them
-	for(i = 0; i < num; i++)
-	{
-		if (selectedWorld.transform.GetChild(i).tag == "humanPerson")
+		//find how many children are already on the planet being moved to
+		dummyNum = 0;
+		if (!Asteroid)
 		{
-			if (!Asteroid)
+			dummyChildList = selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform.gameObject.GetComponentsInChildren(HumanPerson);
+		}
+		else
+		{
+			dummyChildList = selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet.transform.gameObject.GetComponentsInChildren(HumanPerson);
+		}
+		dummyNum = dummyChildList.Length;
+			
+			
+		//get human children and move them
+		for(i = 0; i < num; i++)
+		{
+			if (selectedWorld.transform.GetChild(i).tag == "humanPerson")
 			{
-				//if moving to the human ship then turn hide the person
-				if (selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform.gameObject.name == "humanShip")
+				if (!Asteroid)
 				{
-					selectedWorld.transform.GetChild(i).gameObject.SetActiveRecursively(false);
+					//if moving to the human ship then turn hide the person
+					if (selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform.gameObject.name == "humanShip")
+					{
+						selectedWorld.transform.GetChild(i).gameObject.SetActiveRecursively(false);
+					}
+					ReparentChild(selectedWorld.transform.GetChild(i).gameObject, (-15 * n) + (dummyNum * -15), false);
 				}
-				ReparentChild(selectedWorld.transform.GetChild(i).gameObject, (-15 * n) + (dummyNum * -15), false);
+				else
+				{
+					ReparentChild(selectedWorld.transform.GetChild(i).gameObject, (-15 * n) + (dummyNum * -15), true);
+				}
+				n++;
 			}
-			else
+		}
+							
+		//if the people are moving to the spaceship then add their count to the saved people
+		if (!Asteroid)
+		{
+			if (selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform.gameObject.name == "humanShip")
 			{
-				ReparentChild(selectedWorld.transform.GetChild(i).gameObject, (-15 * n) + (dummyNum * -15), true);
+				peopleSaved += n;
+				Camera.main.transform.Find("PeopleCounter").GetComponent(PeopleCounter).Increment(n);
 			}
-			n++;
 		}
-	}
-						
-	//if the people are moving to the spaceship then add their count to the saved people
-	if (!Asteroid)
-	{
-		if (selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform.gameObject.name == "humanShip")
+		else
 		{
-			peopleSaved += n;
-			Camera.main.transform.Find("PeopleCounter").GetComponent(PeopleCounter).Increment(n);
-		}
-	}
-	else
-	{
-		if (selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet.transform.gameObject.name == "humanShip")
-		{
-			peopleSaved += n;
-			Camera.main.transform.Find("PeopleCounter").GetComponent(PeopleCounter).Increment(n); 
+			if (selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet.transform.gameObject.name == "humanShip")
+			{
+				peopleSaved += n;
+				Camera.main.transform.Find("PeopleCounter").GetComponent(PeopleCounter).Increment(n); 
+			}
 		}
 	}
 }
@@ -1519,33 +1559,36 @@ function LevelSelect()
 			{
 				if(Physics.Raycast(Camera.main.WorldToScreenPoint(Vector3(Touch1StartPos.x,Touch1StartPos.y,Camera.main.transform.position.z)), Camera.main.ScreenToWorldPoint(Vector3(Touch1StartPos.x, Touch1StartPos.y, WorldZDepth - Camera.main.transform.position.z)), objectInfo))
 				{
-					FadeOutKeys(); //fade out keys
-					
-					//save level offset
-					leveloffsetX = LevelOffset.x;
-					leveloffsetY = LevelOffset.y;
-					leveloffsetZ = LevelOffset.z;
-					
-					//Level is set to the collider's name and then loaded. See "nextLevel" code in update function.
-					previousLevel = int.Parse(objectInfo.collider.transform.Find("Num").GetComponent(TextMesh).text);
-					Level = objectInfo.collider.name;
-					nextLevel = true;
-					isLevelSelect = false;
-					isMenu = false;
-					inGame = true;
-					fromLSelect = true;
-					
-					//Goes back to main menu	
-					if(objectInfo.collider.name == "mainmenu")
+					if (objectInfo.collider.tag != "key")
 					{
-						Application.LoadLevel("mainmenu");
+						FadeOutKeys(); //fade out keys
+						
+						//save level offset
+						leveloffsetX = LevelOffset.x;
+						leveloffsetY = LevelOffset.y;
+						leveloffsetZ = LevelOffset.z;
+						
+						//Level is set to the collider's name and then loaded. See "nextLevel" code in update function.
+						previousLevel = int.Parse(objectInfo.collider.transform.Find("Num").GetComponent(TextMesh).text);
+						Level = objectInfo.collider.name;
+						nextLevel = true;
 						isLevelSelect = false;
-						isMenu = true;
+						isMenu = false;
+						inGame = true;
+						fromLSelect = true;
+						
+						//Goes back to main menu	
+						if(objectInfo.collider.name == "mainmenu")
+						{
+							Application.LoadLevel("mainmenu");
+							isLevelSelect = false;
+							isMenu = true;
+						}
+						
+						Touch1Tap = false;
+						Touch1StartPos = Vector2(0,0);
+						Touch1EndPos = Vector2(1000,1000);
 					}
-					
-					Touch1Tap = false;
-					Touch1StartPos = Vector2(0,0);
-					Touch1EndPos = Vector2(1000,1000);
 				}
 				else
 				{
@@ -1598,6 +1641,7 @@ function MoveToWorldView()
 		
 		//move out camera
 		yield StartCoroutine(MoveTo(0.2,CameraZoomOutPos));
+		tapCount = 0;
 	}
 }
 
@@ -1621,6 +1665,7 @@ function MoveToPlayView()
 		
 		//move in camera
 		yield StartCoroutine(MoveTo(0.2,cameraZoomInPos));
+		tapCount = 0;
 	}
 }
 
@@ -1696,12 +1741,13 @@ function LevelWon()
 		
 		//start level winning type
 		FailType.GetComponent(TextTypeEffect).ParentCheck = false;
-		FailType.GetComponent(TextTypeEffect).TextToType = "LEVEL WON";
+		FailType.GetComponent(TextTypeEffect).TextToType = "COMPLETED";
 		FailType.GetComponent(TextTypeEffect).Done = false;
 		FailType.transform.parent = null; //unparent
 	}
 }
-
+ 
+//translate something over time to target
 function MoveTo(time : float, target : Vector3)
 {
 	//set rates and get start time
@@ -1751,7 +1797,8 @@ function MoveTo(time : float, target : Vector3)
 	}
 }
 
-function DepressLevelTag(info : RaycastHit) //depress a level tag
+//depress a level tag
+function DepressLevelTag(info : RaycastHit) 
 {
 	if (info.collider.tag == "LevelTag")
 	{
@@ -1767,7 +1814,8 @@ function DepressLevelTag(info : RaycastHit) //depress a level tag
 	}
 }
 
-function UnpressLevelTag(info : RaycastHit) //unpress a level tag. set it back to its normal state
+//unpress a level tag. set it back to its normal state
+function UnpressLevelTag(info : RaycastHit) 
 {
 	if (info.collider.tag == "LevelTag")
 	{ 
@@ -1790,4 +1838,11 @@ function FadeLevelTagSize(startSize : float)
 		objectInfo.collider.transform.localScale = Vector3(objectInfo.collider.transform.localScale.x - 0.05, objectInfo.collider.transform.localScale.y - 0.05, objectInfo.collider.transform.localScale.z - 0.05); //tag scale 
 		yield;
 	} while (objectInfo.collider.transform.localScale.x > startSize - 0.15 && !Touch1Move && !FadeKick);
+}
+
+//wait and then reset tap count
+function TapResetWait()
+{
+	yield WaitForSeconds (tapTimeLimit);
+	tapCount = 0;
 }

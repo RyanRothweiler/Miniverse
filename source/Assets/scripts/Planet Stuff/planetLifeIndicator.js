@@ -83,8 +83,8 @@ function Update ()
 			transform.parent.collider.enabled = false;
 			
 			//disable select line
-			transform.parent.GetComponent(PlanetSearcher).selectLine.transform.parent = null;
-			transform.parent.GetComponent(PlanetSearcher).selectLine.GetComponentInChildren(MeshRenderer).enabled = false;  
+			//ransform.parent.GetComponent(PlanetSearcher).selectLine.transform.parent = null;
+			//transform.parent.GetComponent(PlanetSearcher).selectLine.GetComponentInChildren(MeshRenderer).enabled = false;  
 		}
 	}
 	else //else pause the animations

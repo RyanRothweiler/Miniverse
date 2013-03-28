@@ -23,20 +23,20 @@ function Start ()
 
 function Update () 
 {
-	if (dragControls.Touching1 && dragGo) //if touching
-	{
-		StopAllCoroutines();
-		dragGo = false;
-		touchGo = true;
-		Type("DRAG");
-	}
-	if (!dragControls.Touching1 && touchGo)
-	{
-		StopAllCoroutines();
-		dragGo = true;
-		touchGo = false;
-		Type("TOUCH");
-	}
+//	if (dragControls.Touching1 && dragGo) //if touching
+//	{
+//		StopAllCoroutines();
+//		dragGo = false;
+//		touchGo = true;
+//		Type("DRAG");
+//	}
+//	if (!dragControls.Touching1 && touchGo)
+//	{
+//		StopAllCoroutines();
+//		dragGo = true;
+//		touchGo = false;
+//		Type("TOUCH");
+//	}
 }
 
 function Type(text : String) //an effect of typing in something
