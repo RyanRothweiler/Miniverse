@@ -1,6 +1,13 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\scripts\Control Stuff\DragControlsPC.js">
+    <Files>
+      <File FileName="Assets\scripts\Asteroid Stuff\AsteroidController.js" Line="43" Column="1" />
+      <File FileName="Assets\scripts\UI Stuff\ProximityIndicator.js" Line="22" Column="1" />
+      <File FileName="Assets\scripts\Human Stuff\HumanPerson.js" Line="25" Column="1" />
+      <File FileName="Assets\scripts\Control Stuff\DragControlsPC.js" Line="314" Column="32" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>

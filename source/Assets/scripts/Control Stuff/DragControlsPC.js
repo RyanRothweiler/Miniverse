@@ -286,26 +286,32 @@ function Start ()
 	{
 		print("IOS");
 		DragRate = 0.02;
-		//WorldDraggingInverted = false;
 		PlatformIOS = true;
 		PlatformPC = false;
 	}
 	else
 	{
-		print("IOS");
-		DragRate = 0.02;
-		//WorldDraggingInverted = false;
-		PlatformIOS = true;
-		PlatformPC = false;
-//		print("PC");
-//		PlatformPC = true;
-//		PlatformIOS = false;
+//		print("IOS");
+//		DragRate = 0.02;
+//		PlatformIOS = true;
+//		PlatformPC = false;
+		print("PC");
+		PlatformPC = true;
+		PlatformIOS = false;
 	}
 	
 	//ios initializations
 	if (PlatformIOS)
 	{
 		LevelOffset = Vector3(leveloffsetX, leveloffsetY, leveloffsetZ);
+	}
+	
+	//pc initializations
+	if (PlatformPC)
+	{
+		CanScrollZoom = true;
+		CanViewDrag = true;
+		WorldDraggingInverted = true;
 	}
 	
 }
