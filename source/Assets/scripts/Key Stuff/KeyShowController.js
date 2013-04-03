@@ -151,7 +151,7 @@ function Start ()
 	{
 		if (Camera.main.GetComponent(KeyPositions).key13 == Vector3.zero)
 		{
-			Camera.main.GetComponent(KeyPositions).key8 = Key.transform.position;
+			Camera.main.GetComponent(KeyPositions).key13 = Key.transform.position;
 			Key.transform.position = Camera.main.GetComponent(KeyPositions).key13;
 		}
 		else
