@@ -1,14 +1,9 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/scripts/Sun Stuff/ShrinkCode.js">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\scripts\UI Stuff\TextTypeEffect.js">
     <Files>
-      <File FileName="Assets/scripts/Control Stuff/TiltControls.js" Line="1" Column="1" />
-      <File FileName="Assets/scripts/Control Stuff/DragControlsPC.js" Line="275" Column="36" />
-      <File FileName="Assets/scripts/Planet Stuff/PlanetController.js" Line="9" Column="19" />
-      <File FileName="Assets/scripts/UI Stuff/PeopleCounter.js" Line="1" Column="1" />
-      <File FileName="Assets/scripts/Key Stuff/KeyPositions.js" Line="1" Column="1" />
-      <File FileName="Assets/scripts/Key Stuff/KeyShowController.js" Line="154" Column="48" />
-      <File FileName="Assets/scripts/Sun Stuff/ShrinkCode.js" Line="1" Column="1" />
+      <File FileName="Assets\scripts\Tutorial Stuff\PinchOutTutorial.js" Line="58" Column="2" />
+      <File FileName="Assets\scripts\UI Stuff\TextTypeEffect.js" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
