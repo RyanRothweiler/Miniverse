@@ -1,9 +1,10 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\scripts\UI Stuff\TextTypeEffect.js">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\scripts\Overhead Stuff\Distress Camera Stuff\DistressCameraController.js">
     <Files>
-      <File FileName="Assets\scripts\Tutorial Stuff\PinchOutTutorial.js" Line="58" Column="2" />
-      <File FileName="Assets\scripts\UI Stuff\TextTypeEffect.js" Line="1" Column="1" />
+      <File FileName="Assets\scripts\Overhead Stuff\Distress Camera Stuff\DistressCameraController.js" Line="77" Column="2" />
+      <File FileName="Assets\scripts\Control Stuff\DragControlsPC.js" Line="1777" Column="24" />
+      <File FileName="Assets\scripts\Planet Stuff\PlanetSearcher.js" Line="175" Column="4" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

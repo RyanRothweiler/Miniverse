@@ -22,6 +22,7 @@ private var indicatorFirstShow = true;
 private var indicatorFirstHide = true;
 private var oldRot : Vector3;
 private var newRot : Vector3;
+private var lookAtPos : Vector3; //the moving position target for the porximity indicator to look at
 
 function Start ()
 {
@@ -152,11 +153,14 @@ function Update ()
 				{
 					indicatorFirstShow = false;
 					indicatorFirstHide = true;
+					lookAtPos = nearestPlanet.transform.position;
 					selectLine.GetComponentInChildren(ProximityIndicator).Show(); //show proximity indicator
 				}
 				
 				//point the indicator
-			    selectLine.transform.position = AsteroidCenter.transform.position;
+			    //selectLine.transform.position = AsteroidCenter.transform.position;
+			    lookAtPos = Vector3(Mathf.Lerp(lookAtPos.x, nearestPlanet.transform.position.x, 0.2), Mathf.Lerp(lookAtPos.y, nearestPlanet.transform.position.y, 0.2),Mathf.Lerp(lookAtPos.z, nearestPlanet.transform.position.z, 0.2));
+			    
 			    if(selectLine.transform.localEulerAngles.y > 100)
 			    {
 			       	fVector = Vector3(0,0,1);
@@ -165,19 +169,22 @@ function Update ()
 			    {
 			     	fVector = Vector3(0,0,-1);
 			    }
-				selectLine.transform.LookAt(nearestPlanet.transform,fVector); //point at target
+				selectLine.transform.LookAt(lookAtPos,fVector); //point at target
 			}
-			else
+			else //if found a planet
 			{
 				if (indicatorFirstShow)
 				{
 					indicatorFirstShow = false;
 					indicatorFirstHide = true;
+					lookAtPos = nearestPlanet.transform.position;
 					selectLine.GetComponentInChildren(ProximityIndicator).Show(); //show proximity indicator
 				}
 				
 				//point the indicator
-			    selectLine.transform.position = AsteroidCenter.transform.position;
+			    //selectLine.transform.position = AsteroidCenter.transform.position;
+			    lookAtPos = Vector3(Mathf.Lerp(lookAtPos.x, nearestPlanet.transform.position.x, 0.2), Mathf.Lerp(lookAtPos.y, nearestPlanet.transform.position.y, 0.2),Mathf.Lerp(lookAtPos.z, nearestPlanet.transform.position.z, 0.2));
+			    
 			    if(selectLine.transform.localEulerAngles.y > 100)
 			    {
 			       	fVector = Vector3(0,0,1);
@@ -186,7 +193,7 @@ function Update ()
 			    {
 			     	fVector = Vector3(0,0,-1);
 			    }
-				selectLine.transform.LookAt(nearestPlanet.transform,fVector); //point at target
+				selectLine.transform.LookAt(lookAtPos,fVector); //point at target
 	        }
 		}
 		else //if haven't found anything then turn off the select line
@@ -196,6 +203,7 @@ function Update ()
 				indicatorFirstHide = false;
 				indicatorFirstShow = true;
 				selectLine.GetComponentInChildren(ProximityIndicator).Hide();
+				lookAtPos = Vector3.zero;
 			}
 		}
 	}
@@ -218,5 +226,5 @@ function FadeInMat(mat : Material)
 	{
 		mat.color.a += Time.deltaTime * 10;
 		yield WaitForSeconds(0.01);
-	} while (mat.color.a < 1);
+	} while (mat.color.a < 0.3);
 }

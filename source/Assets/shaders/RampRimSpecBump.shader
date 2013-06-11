@@ -20,7 +20,8 @@ Shader "Shaders/RampRimSpecBump"
 	
 	SubShader 
 	{
-		Tags { "RenderType"="Opaque" }		
+		Tags { "RenderType"="Opaque" }
+		LOD 400	
 		CGPROGRAM
 		#pragma surface surf CustomDiffuse
 		

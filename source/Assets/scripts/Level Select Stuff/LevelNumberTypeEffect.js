@@ -42,7 +42,7 @@ function Start ()
         swapped = false;
     	j++;
         for (i = 0; i < numbers.Length - j; i++) 
-        {                                       
+        {
         	if (int.Parse(numbers[i].GetComponent(TextMesh).text) > int.Parse(numbers[i + 1].GetComponent(TextMesh).text)) 
         	{                          
             	dummyObj = numbers[i];

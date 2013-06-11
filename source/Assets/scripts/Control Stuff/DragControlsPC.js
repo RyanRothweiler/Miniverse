@@ -3,6 +3,7 @@
 //public vars
 public var objectInfo : RaycastHit;
 public var selectedWorld : RaycastHit;
+public var tempSelectedWorld : RaycastHit;
 
 public var peopleSaved = 0; //number of people saved
 public var peopleGoal : int; //win condition of the level
@@ -39,6 +40,7 @@ public var LevelLost = false; //triggered by lose condition
 public var FlyAway = false; //flying the spaceship away to the next level
 public var StartZoomedOut = true; //if the level starts in the paused zoomed out view or the play view
 public var levelWon = false;
+public var nextLevel = false;
 
 public var Phase1 = false;
 public var Phase2 = false;
@@ -61,7 +63,7 @@ public var TransitionStars : GameObject; //the transition star plane
 public var SceneScaleController : GameObject; // controls the scale of all notBackground objects in the scene.
 public var PlanetExplosion : GameObject;
 public var LevelSelectMovementController : GameObject; //the parent for all the level select objects
-public var PeoplePoof : GameObject; //the PeoplePoof particle effect
+public var HumanPersonFab : GameObject; //the human person prefab
 public var PausePlane : GameObject; //the pause plane which will show when zoomed out
 public var ZoomStreaks : GameObject; //the star streaks which show when zooming
 public var FailType : TextMesh; //the type which shows on level fail
@@ -92,6 +94,10 @@ private var dummyNum : int;
 private var xRate : int; //rate of movement in x axis (used for MoveTo())
 private var yRate : int; //rate of movement in y axis
 private var zRate : int; //rate of movement in z axis
+private var MoveNum : int; //used for moving people
+private var MoveI : int; //used for moging people
+private var MoveN : int; //used for moving people
+private var MoveDummyNum : int; //used for moving people
 
 //array
 private var objects : GameObject[];
@@ -108,7 +114,6 @@ private var canMove : boolean;
 private var worldDragging : boolean;
 private var close : boolean;
 private var resetting : boolean;
-private var nextLevel : boolean;
 private var cont : boolean;
 var halt : boolean; //Stops events in the level from running until the zoom sequence has finished.
 static var isPlayOne : boolean; //Determines if the Camera should zoom in or not.
@@ -145,6 +150,7 @@ private static var PrevLevelLoc : Vector3; //the previous level tag's location
 private var LevelOffset : Vector3; 
 private var shipLoc : Vector3; //the location of the ship
 private var Timer : LevelTimer; //the script which controls the level times
+private var dummyObj : GameObject; //a dummy game object
 
 //touch control variables
 public var Touch1StartPos = Vector2(0,0); //the start position of a touch
@@ -416,7 +422,7 @@ function Update ()
 				}
 			}
 			//if planet dragging
-			if (!LevelPaused && Input.GetMouseButton(0) && worldSelected && selectedWorld.collider != null && selectedWorld.collider.name != "humanShip" && selectedWorld.collider.name != "Asteroid" && selectedWorld.collider.name != "Icosphere" && selectedWorld.transform.gameObject.name != "RedAsteroid")//&& !selectedWorld.collider.GetComponentInChildren(planetLifeIndicator).dead)
+			if (!LevelPaused && Input.GetMouseButton(0) && worldSelected && selectedWorld.collider != null && selectedWorld.collider.name != "humanShip" && selectedWorld.collider.name != "Asteroid" && selectedWorld.collider.name != "AsteroidCenter" && selectedWorld.transform.gameObject.name != "RedAsteroid")//&& !selectedWorld.collider.GetComponentInChildren(planetLifeIndicator).dead)
 			{
 				if (TouchAutoMove)
 				{
@@ -487,7 +493,7 @@ function Update ()
 				//make sure the player clicked on a planet
 				if (Physics.Raycast(Camera.main.ScreenPointToRay(Vector3(Input.mousePosition.x, Input.mousePosition.y, WorldZDepth - Camera.main.transform.position.z)).origin, Camera.main.ScreenPointToRay(Vector3(Input.mousePosition.x, Input.mousePosition.y, WorldZDepth - Camera.main.transform.position.z)).direction, objectInfo))
 				{
-					if (objectInfo.collider.name == "Icosphere" && selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet != selectedWorld.collider.gameObject) //if selected an asteroid and the asteroids nearest planet is not itself
+					if (objectInfo.collider.name == "AsteroidCenter" && selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet != selectedWorld.collider.gameObject) //if selected an asteroid and the asteroids nearest planet is not itself
 					{	
 						//if mouse didn't move
 						if (mousePos == Input.mousePosition && selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet != selectedWorld.collider.gameObject)
@@ -542,7 +548,7 @@ function Update ()
 								MoveToWorldView();
 							}
 						}
-						
+
 						Touch1Start = false;
 						Touch1StartPos = touch.position;
 						
@@ -556,6 +562,12 @@ function Update ()
 								selectedWorld = objectInfo;
 								selectedWorld.collider.GetComponent(PlanetSearcher).Selected = true;
 								offSet = selectedWorld.transform.position - Camera.main.ScreenToWorldPoint(Vector3(touch.position.x, touch.position.y,WorldZDepth - Camera.main.transform.position.z));
+							}
+							
+							//if tapped the reset button
+							if (objectInfo.collider.name == "BackArrow")
+							{
+								print("hit back");
 							}
 						}
 					}
@@ -606,7 +618,7 @@ function Update ()
 				}
 				
 				//if planet dragging
-				if (!LevelPaused && Touch1WorldSelected && selectedWorld.collider != null && selectedWorld.collider.name != "humanShip" && selectedWorld.collider.name != "Asteroid" && selectedWorld.collider.name != "Icosphere" && selectedWorld.transform.gameObject.name != "RedAsteroid")
+				if (!LevelPaused && Touch1WorldSelected && selectedWorld.collider != null && selectedWorld.collider.name != "humanShip" && selectedWorld.collider.name != "Asteroid" && selectedWorld.collider.name != "AsteroidCenter" && selectedWorld.transform.gameObject.name != "RedAsteroid")
 				{
 					Touch1WorldSelected = true;
 					if (TouchAutoMove)
@@ -659,7 +671,7 @@ function Update ()
 				}
 				
 				//if planet dragging
-				if (!LevelPaused && Touch2WorldSelected && selectedWorld.collider != null && selectedWorld.collider.name != "humanShip" && selectedWorld.collider.name != "Asteroid" && selectedWorld.collider.name != "Icosphere" && selectedWorld.transform.gameObject.name != "RedAsteroid")
+				if (!LevelPaused && Touch2WorldSelected && selectedWorld.collider != null && selectedWorld.collider.name != "humanShip" && selectedWorld.collider.name != "Asteroid" && selectedWorld.collider.name != "AsteroidCenter" && selectedWorld.transform.gameObject.name != "RedAsteroid")
 				{
 					if (TouchAutoMove)
 					{
@@ -846,7 +858,7 @@ function Update ()
 				{	
 					Touch1Tap = false;	
 						
-					if (selectedWorld.collider.name == "Icosphere") //if selected an asteroid
+					if (selectedWorld.collider.name == "AsteroidCenter") //if selected an asteroid
 					{			
 						MovePeople(true);
 					}
@@ -885,7 +897,7 @@ function Update ()
 				if (Touch2Tap && objectInfo.collider != null)
 				{
 					Touch2Tap = false;
-					if (selectedWorld.collider.name == "Icosphere") //if selected an asteroid
+					if (selectedWorld.collider.name == "AsteroidCenter") //if selected an asteroid
 					{
 						MovePeople(true);
 					}
@@ -1079,93 +1091,145 @@ function MovePeople(Asteroid : boolean)
 	if (canMoveToWorld)
 	{
 		//Get the childCount and store it in num
-		num = selectedWorld.transform.childCount;
-		n = 0;
+		tempSelectedWorld = selectedWorld;
+		MoveNum = tempSelectedWorld.transform.childCount;
+		MoveN = 0;
 		
 		//find how many children are already on the planet being moved to
-		dummyNum = 0;
+		MoveDummyNum = 0;
 		if (!Asteroid)
 		{
-			dummyChildList = selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform.gameObject.GetComponentsInChildren(HumanPerson);
+			dummyChildList = tempSelectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform.gameObject.GetComponentsInChildren(HumanPerson);
 		}
 		else
 		{
-			dummyChildList = selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet.transform.gameObject.GetComponentsInChildren(HumanPerson);
+			dummyChildList = tempSelectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet.transform.gameObject.GetComponentsInChildren(HumanPerson);
 		}
-		dummyNum = dummyChildList.Length;
-			
-			
-		//get human children and move them
-		for(i = 0; i < num; i++)
+		MoveDummyNum = dummyChildList.Length;
+		
+		//get list of children being moved
+		if (!Asteroid)
 		{
-			if (selectedWorld.transform.GetChild(i).tag == "humanPerson")
+			dummyChildList = tempSelectedWorld.transform.gameObject.GetComponentsInChildren(HumanPerson);
+		}
+		else
+		{
+			dummyChildList = tempSelectedWorld.transform.parent.parent.GetComponentsInChildren(HumanPerson);
+		}
+		
+		//get human children and move them
+		for(MoveI = 0; MoveI < dummyChildList.Length; MoveI++)
+		{
+			if (!Asteroid)
 			{
-				if (!Asteroid)
+				yield StartCoroutine(ReparentChild(dummyChildList[MoveI].gameObject, (-25 * MoveN) + (-25 * MoveDummyNum)));
+				//if moving to the human ship then turn hide the person
+				if (tempSelectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform.gameObject.name == "humanShip")
 				{
-					//if moving to the human ship then turn hide the person
-					if (selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform.gameObject.name == "humanShip")
-					{
-						selectedWorld.transform.GetChild(i).gameObject.SetActiveRecursively(false);
-					}
-					ReparentChild(selectedWorld.transform.GetChild(i).gameObject, (-15 * n) + (dummyNum * -15), false);
+					dummyChildList[MoveI].gameObject.SetActiveRecursively(false);
 				}
-				else
-				{
-					ReparentChild(selectedWorld.transform.GetChild(i).gameObject, (-15 * n) + (dummyNum * -15), true);
-				}
-				n++;
 			}
+			else
+			{
+				yield StartCoroutine(ReparentChild(dummyChildList[MoveI].gameObject, (-25 * MoveN) + (-25 * MoveDummyNum)));
+			}
+			MoveN++;
 		}
 							
-		//if the people are moving to the spaceship then add their count to the saved people
+		//if the people are moving to the spaceship then add their count to the saved people. Need to know if moving people from an asteroid.
 		if (!Asteroid)
 		{
-			if (selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform.gameObject.name == "humanShip")
+			if (tempSelectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform.gameObject.name == "humanShip")
 			{
-				peopleSaved += n;
-				Camera.main.transform.Find("PeopleCounter").GetComponent(PeopleCounter).Increment(n);
+				peopleSaved += MoveN;
+				Camera.main.transform.Find("PeopleCounter").GetComponent(PeopleCounter).Increment(MoveN);
 			}
 		}
 		else
 		{
-			if (selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet.transform.gameObject.name == "humanShip")
+			if (tempSelectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet.transform.gameObject.name == "humanShip")
 			{
-				peopleSaved += n;
-				Camera.main.transform.Find("PeopleCounter").GetComponent(PeopleCounter).Increment(n); 
+				peopleSaved += MoveN;
+				Camera.main.transform.Find("PeopleCounter").GetComponent(PeopleCounter).Increment(MoveN); 
 			}
 		}
 	}
 }
 
-function ReparentChild(datChild : GameObject, rotOffset : int, asteroid : boolean)
+function ReparentChild(fromChild : GameObject, rotOffset : int) //this used to actually reparent the child, until the person movement effect changed, now it creates a new child at the planet. This only needs to know if the object being moved to is an asteroid.
 {
-	//people poof
-	GameObject.Instantiate(PeoplePoof, datChild.transform.GetChild(0).transform.position, Quaternion(0,0,0,0)); 
-			
-	//wait a bit
-	yield WaitForSeconds(0.1);
-	datChild.gameObject.active = false;
-			
-	//move child
-	datChild.gameObject.active = true;
-	if (!asteroid)
+	//teleport out 'from' child
+	fromChild.GetComponent(HumanPerson).TeleportOut();
+	
+	//if the selected world is a planet
+	if (selectedWorld.collider.name == "HumanPlanet")
 	{
-		datChild.transform.parent = selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform;
-		datChild.transform.position = selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform.position;
-	}
-	else
-	{
-		datChild.transform.parent = selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet.transform;
-		datChild.transform.position = selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet.transform.position;	
-	}
-	datChild.transform.rotation.x = 0; //reset rotation
-	datChild.transform.rotation.y = 0;
-	datChild.transform.rotation.z = 0;
-	datChild.transform.rotation.w = 0;
-	datChild.transform.Rotate(0, 0, rotOffset, Space.Self);
+		//planet to planet
+		if (selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.name == "HumanPlanet")
+		{
+			dummyObj = GameObject.Instantiate(HumanPersonFab, selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform.position, Quaternion(0,0,0,0));
+			dummyObj.transform.position = selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform.position;
+			dummyObj.transform.parent = selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform;
+			dummyObj.GetComponent(HumanPerson).TeleportIn();
 			
-	//people poof from new location
-	GameObject.Instantiate(PeoplePoof, datChild.transform.GetChild(0).transform.position, Quaternion(0,0,0,0)); 
+			//offset the person rotation
+			dummyObj.transform.Rotate(0, 0, rotOffset, Space.Self);
+			
+			//reset person scale
+			dummyObj.transform.localScale = Vector3(1,1,1);
+		}
+	
+		//planet to asteroid
+		if (selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.name == "AsteroidCenter")
+		{
+			dummyObj = GameObject.Instantiate(HumanPersonFab, selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform.position, Quaternion(0,0,0,0));
+			dummyObj.transform.position = selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform.position;
+			dummyObj.transform.parent = selectedWorld.transform.gameObject.GetComponent(PlanetSearcher).nearestPlanet.transform;
+			dummyObj.GetComponent(HumanPerson).TeleportIn();
+			
+			//offset the person rotation
+			dummyObj.transform.Rotate(0, 0, rotOffset, Space.Self);
+			
+			//reset person scale and rotate up
+			dummyObj.transform.localScale = Vector3(1.2,1.2,1.2);
+		}
+	}
+	
+	//if the selectedworld is an asteroid
+	if (selectedWorld.collider.name == "AsteroidCenter")
+	{
+		//asteroid to planet
+		if (selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet.name == "HumanPlanet")
+		{
+			dummyObj = GameObject.Instantiate(HumanPersonFab, selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet.transform.position, Quaternion(0,0,0,0));
+			dummyObj.transform.position = selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet.transform.position;
+			dummyObj.transform.parent = selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet.transform;
+			dummyObj.GetComponent(HumanPerson).TeleportIn();
+			
+			//offset the person rotation
+			dummyObj.transform.Rotate(0, 0, rotOffset, Space.Self);
+			
+			//reset person scale
+			dummyObj.transform.localScale = Vector3(1,1,1);
+		}
+		//asteroid to asteroid
+		if (selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet.name == "AsteroidCenter")
+		{
+			dummyObj = GameObject.Instantiate(HumanPersonFab, selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet.transform.position, Quaternion(0,0,0,0));
+			dummyObj.transform.position = selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet.transform.position;
+			dummyObj.transform.parent = selectedWorld.transform.parent.parent.gameObject.GetComponent(AsteroidController).nearestPlanet.transform;
+			dummyObj.GetComponent(HumanPerson).TeleportIn();
+			
+			//offset the person rotation
+			dummyObj.transform.Rotate(0, 0, rotOffset, Space.Self);
+			
+			//reset person scale
+			dummyObj.transform.localScale = Vector3(1.2,1.2,1.2);
+		}
+	}
+	
+	//offset each person animation
+	yield WaitForSeconds(0.1); 
 }
 
 //check phases for automove
@@ -1715,12 +1779,11 @@ function LevelLose()
 {
 	halt = true;
 	yield WaitForSeconds(0.2);
-	FailType.GetComponent(TextTypeEffect).TextToType = "LEVEL FAIL";
-	FailType.GetComponent(TextTypeEffect).Done = false;
+	FailType.GetComponent(TextTypeEffect).Type("LEVEL FAIL");
 	
 	yield WaitForSeconds(1.5);
 	
-	//untype old text
+	//type fail text
 	LevelLost = true;
 	str = FailType.text;
 	j = str.Length;

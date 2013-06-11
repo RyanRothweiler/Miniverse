@@ -22,6 +22,7 @@ public var NextPlanet : GameObject; //the next planet the player will control fo
 //private vars
 private var fVector : Vector3;
 private var objectPos : Vector3;
+private var lookAtPos : Vector3; //the moving position target for the porximity indicator to look at
 private var gameObjects = new Array();
 private var nearestDistanceSqr : float; 
 private var distanceSqr : float;
@@ -171,6 +172,7 @@ function BeginSearch ()
 		{
 			indicatorFirstShow = false;
 			indicatorFirstHide = true;
+			lookAtPos = nearestPlanet.transform.position;
 			selectLine.GetComponentInChildren(ProximityIndicator).Show();
 		}
 		//point the indicator
@@ -183,6 +185,8 @@ function BeginSearch ()
 	    {
 	     	fVector = Vector3(0,0,-1);
 	    }
+	    //change the target
+	    lookAtPos = Vector3(Mathf.Lerp(lookAtPos.x, nearestPlanet.transform.position.x, 0.2), Mathf.Lerp(lookAtPos.y, nearestPlanet.transform.position.y, 0.2),Mathf.Lerp(lookAtPos.z, nearestPlanet.transform.position.z, 0.2));
 	    
 	    //point selector at planet
 	    if(nearestPlanet.name == "humanShip")
@@ -191,7 +195,7 @@ function BeginSearch ()
 	    }
 	    else
 	    {
-	    	selectLine.transform.LookAt(nearestPlanet.transform,fVector);
+	    	selectLine.transform.LookAt(lookAtPos,fVector);
 	    }
 	}
 	else
@@ -202,6 +206,7 @@ function BeginSearch ()
 			selectLine.GetComponentInChildren(ProximityIndicator).Hide();
 			indicatorFirstShow = true;
 			indicatorFirstHide = false;
+			lookAtPos = Vector3.zero;
 		}
 	}
 	

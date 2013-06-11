@@ -54,6 +54,7 @@
      <Compile Include="Assets\scripts\Control Stuff\Joystick.js" />
      <Compile Include="Assets\scripts\Control Stuff\TiltControls.js" />
      <Compile Include="Assets\scripts\Effects\ExplosionParticleEffect.js" />
+     <Compile Include="Assets\scripts\Effects\HumanTeleportEffectController.js" />
      <Compile Include="Assets\scripts\Effects\TransitionStars.js" />
      <Compile Include="Assets\scripts\Human Stuff\HumanPerson.js" />
      <Compile Include="Assets\scripts\Human Stuff\HumanShip.js" />
@@ -69,6 +70,9 @@
      <Compile Include="Assets\scripts\Level Select Stuff\LevelSelectPlanetController.js" />
      <Compile Include="Assets\scripts\Level Select Stuff\LevelTimeType.js" />
      <Compile Include="Assets\scripts\Overhead Stuff\BossLevelLocking.js" />
+     <Compile Include="Assets\scripts\Overhead Stuff\Distress Camera Stuff\DistressArrowController.js" />
+     <Compile Include="Assets\scripts\Overhead Stuff\Distress Camera Stuff\DistressCameraController.js" />
+     <Compile Include="Assets\scripts\Overhead Stuff\Distress Camera Stuff\DistressUI.js" />
      <Compile Include="Assets\scripts\Overhead Stuff\FPSDraw.js" />
      <Compile Include="Assets\scripts\Overhead Stuff\LevelTimer.js" />
      <Compile Include="Assets\scripts\Overhead Stuff\PausePlane.js" />
@@ -87,6 +91,7 @@
      <Compile Include="Assets\scripts\Tutorial Stuff\PinchOutTutorial.js" />
      <Compile Include="Assets\scripts\Tutorial Stuff\TouchTutorial.js" />
      <Compile Include="Assets\scripts\Tutorial Stuff\WorldTouchTutorial.js" />
+     <Compile Include="Assets\scripts\UI Stuff\BackArrow.js" />
      <Compile Include="Assets\scripts\UI Stuff\LevelTimerDisplay.js" />
      <Compile Include="Assets\scripts\UI Stuff\LevelWinText.js" />
      <Compile Include="Assets\scripts\UI Stuff\PauseText.js" />
@@ -94,17 +99,20 @@
      <Compile Include="Assets\scripts\UI Stuff\ProximityIndicator.js" />
      <Compile Include="Assets\scripts\UI Stuff\SpriteSheetOffsetAnimation.js" />
      <Compile Include="Assets\scripts\UI Stuff\TextTypeEffect.js" />
+     <Compile Include="Assets\scripts\UI Stuff\WarningController.js" />
      <Compile Include="Assets\scripts\UI Stuff\ZoomStarStreaks.js" />
      <None Include="Assets\shaders\RampRim.shader" />
      <None Include="Assets\shaders\CustFontShader.shader" />
      <None Include="Assets\shaders\RampRimSpecBump.shader" />
      <None Include="Assets\shaders\CustTextMesh.shader" />
+     <None Include="Assets\shaders\Mask.shader" />
      <None Include="Assets\shaders\PlanetRingIndicator.shader" />
      <None Include="Assets\shaders\RampRimBump.shader" />
      <None Include="Assets\shaders\shader.shader" />
      <None Include="Assets\shaders\CustSelfIlluminSpec.shader" />
      <None Include="Assets\shaders\RampRimSpec.shader" />
      <None Include="Assets\lProgress.xml" />
+     <None Include="Assets\shaders\RampRim_Teleport.shader" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
