@@ -1,0 +1,14 @@
+		//level timer stuff I think I might need later
+		//if (objectInfo.collider.transform.Find("Num").GetComponent(TextMesh).text == "BOSS LEVEL"
+	//	if(!info.collider.transform.Find("Num").GetComponent(TextMesh).text == "locked") //if not boss level then depress time
+	//	{
+			//info.collider.transform.Find("Time").renderer.material.color.a = 0.4; //time
+	//	}
+
+
+		//info.collider.transform.localScale = Vector3(info.collider.transform.localScale.x + 0.15, info.collider.transform.localScale.y + 0.15, info.collider.transform.localScale.z + 0.15); //tag scale
+	//	if(!info.collider.name == "locked") //if not boss level then depress time
+	//	{
+			//info.collider.transform.Find("Time").renderer.material.color.a = 1; //time
+	//	}
+		

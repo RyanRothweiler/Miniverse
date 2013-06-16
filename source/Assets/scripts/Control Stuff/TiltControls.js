@@ -2,7 +2,7 @@
 
 //public vars
 public var UseTiltControls : boolean; //if useing the tilt controls at all or not
-static var Speed : float; //speed at which the camera moves
+public static var Speed : float; //speed at which the camera moves
 
 //private vars
 private var dragControls : DragControlsPC;
@@ -62,5 +62,5 @@ function Update ()
 
 function OnGUI ()
 {
-	Speed = GUI.HorizontalSlider (Rect (25, 80, 100, 30), Speed, 20.0, 50.0);
+	//Speed = GUI.HorizontalSlider (Rect (25, 80, 100, 30), Speed, 20.0, 50.0);
 }

@@ -28,8 +28,10 @@ public var CanMoveCameraHorizontal : boolean; //if the player can move the camer
 public var TouchAutoMove : boolean; //if true then when a planet is touched, the camera will automatically move up until the end of the level. used on the boss level
 public var sunShrink : boolean;
 public var AutoMoving = false; //boss level moving
-public var isMenu : boolean;
 public var isLevelSelect : boolean;
+public var isMainMenu : boolean; //if this level is the main menu
+public var isSettingsMenu : boolean; //if this scene is the settings menu
+public var isContactMenu : boolean; //if this scene is the contact menu
 public var CanScrollZoom : boolean; //if the level can scrool zoom, also pinch zoom
 public var DoubleTapZoom : boolean; //if the level can double tap / double click zoom
 public var LevelPaused : boolean; //if the level is paused. Only zoom controls work if the level is paused. 
@@ -117,7 +119,6 @@ private var resetting : boolean;
 private var cont : boolean;
 var halt : boolean; //Stops events in the level from running until the zoom sequence has finished.
 static var isPlayOne : boolean; //Determines if the Camera should zoom in or not.
-static var isOptions : boolean;
 static var inGame : boolean;
 static var fromLSelect : boolean;
 private var buttonPushed = false;//if the back button was pushed
@@ -127,6 +128,11 @@ private var ZoomVirgin = true;
 private var tagPressed = false; //if a level tag has been pressed or not
 private var iosTagDepress = false;  //if a tag is depressed
 private var FadeKick = false; //if kick out of the level tag fading
+private var toSettings = false; //moving to the setting scene
+private var toContact = false; //moving to the contact scene
+private var toLevelSelect = false; //move to the level select scene
+private var toLevel = false; //moving to a level scene
+private var toMainMenu = false; //moving to the main menu scene
 
 //Strings
 private var Level : String;
@@ -183,9 +189,6 @@ private var PinchOut = false;
 public var tapCount = 0; //the number of taps within the tap time limit. used for detecting doubel taps
 private var tapTimeLimit = 0.3; //the time to wait unitl resetting tapCount
 
-//Level Saving/Progress/Time Specific Vars
-private static var sS : SaveStating;
-private var bTime : int;
 
 //camera zooming
 function OnLevelWasLoaded()
@@ -227,18 +230,6 @@ function Start ()
 	//center scale controller
 	SceneScaleController.transform.position = Vector3(this.transform.position.x, this.transform.position.y, SceneScaleController.transform.position.z);
 	
-	//create ss
-	sS = new SaveStating();
-
-	if(Application.loadedLevelName == "mainmenu")
-	{
-		isMenu = true;
-	}
-	else
-	{
-		isMenu = false;
-	}
-	
 	//level select init
 	if (isLevelSelect) 
 	{
@@ -250,13 +241,20 @@ function Start ()
 		transform.position.z = camZStopPos;
 	}
 	
+	//other menu inits
+	if (isMainMenu || isSettingsMenu || isContactMenu)
+	{
+		//instant zoom
+		transform.position.z = camZStopPos;
+	}
+	
 	objects = GameObject.FindObjectsOfType(GameObject);
 	worldObjects = GameObject.FindGameObjectsWithTag("world");
 	sunObjects = GameObject.FindGameObjectsWithTag("sun");
 	personObjects = GameObject.FindGameObjectsWithTag("humanPerson");
 
 	//This is kinda important, it keeps everything properly parented so this sorting step is necessary
-	if (!isLevelSelect)
+	if (!isLevelSelect && !isMainMenu && !isSettingsMenu && !isContactMenu)
 	{
 		for (i = 0; i < objects.length; i++)
 		{	
@@ -282,7 +280,7 @@ function Start ()
 	peopleAlive = personObjects.length;
 	
 	//scale down
-	if (!isLevelSelect) 
+	if (!isLevelSelect && !isMainMenu && !isSettingsMenu && !isContactMenu) 
 	{
 		SceneScaleController.transform.localScale = Vector3(0,0,0); 
 	}
@@ -317,7 +315,7 @@ function Start ()
 	{
 		CanScrollZoom = true;
 		CanViewDrag = true;
-		WorldDraggingInverted = true;
+		//WorldDraggingInverted = true;
 	}
 	
 }
@@ -328,39 +326,7 @@ function Update ()
 	//rest stuff
 	Transitioning = false;
 	
-	//Use "M" key to save for computer, just for testing and this is the usage btw
-	if(Input.GetButton("M"))
-	{
-		Debug.Log("Save");
-		sS.xmlHandler.World = sS.xmlHandler.sWorld;
-		sS.xmlHandler.Save(Path.Combine(Application.dataPath, "lProgress.xml"));
-	}
-	//Use "L" key to load for computer, just for testing and this is the usage btw
-	if(Input.GetButton("L"))
-	{
-		print("Load");
-		//Basically, what is loaded is an "XmlHandler" object that is then assigned to the one our game is using.
-		sS.xmlHandler = sS.xmlHandler.Load(Path.Combine(Application.dataPath, "lProgress.xml"));
-		for(var p : Level in sS.xmlHandler.World)
-		{
-			print("print you bitch");
-			print(p.name);
-			print(p.bTime);
-			print(p.lProgress);
-		}
-		//Since our level select screen uses the static var sWorld to display completion info the static var must = the non-static one
-		sS.xmlHandler.sWorld = sS.xmlHandler.World;
-		
-	}
-
-	
-	//main menu stuff
-	if(isMenu)
-	{
-		MainMenu();
-	}
-	
-	//level select stuff
+	//just menu stuff. this code is shit
 	if(isLevelSelect)
 	{
 		LevelSelect();
@@ -370,11 +336,18 @@ function Update ()
 	{
 		LevelFirst = true;
 	}
-		
-//	if(isOptions)
-//	{
-//		Options();
-//	}
+	if (isMainMenu)
+	{
+		MainMenu();
+	}	
+	if (isSettingsMenu)
+	{
+		SettingsMenu();
+	}
+	if (isContactMenu)
+	{
+		ContactMenu();
+	}
 
 	//autoMoving moving up
 	if (AutoMoving)
@@ -1011,8 +984,6 @@ function Update ()
 		if (transform.position.z >= WorldZDepth + 10)
 		{
 			StarStreakMat.SetColor("_TintColor",Color(StarStreakMat.GetColor("_TintColor").r, StarStreakMat.GetColor("_TintColor").g, StarStreakMat.GetColor("_TintColor").b, 0));
-			sS.n = Application.loadedLevelName;
-			sS.SS();
 			Application.LoadLevel(Application.loadedLevelName);
 		}
 	}
@@ -1023,19 +994,41 @@ function Update ()
 	//if the level has been beat
 	if (nextLevel)
 	{
-		if(inGame && !fromLSelect) //moving back to level select
+		//moving to the settings scene
+		if (toSettings)
+		{
+			isPlayOne = true;
+			ZoomIn();
+			if (transform.position.z >= WorldZDepth + 10)
+			{
+				Application.LoadLevel("Settings_SCE");
+			}
+		}
+		
+		if (toContact)
+		{
+			isPlayOne = true;
+			ZoomIn();
+			if (transform.position.z >= WorldZDepth + 10)
+			{
+				Application.LoadLevel("Contact_SCE");
+			}
+		}
+		
+		//moving to the level select scene
+		if (toLevelSelect)
 		{
 			isPlayOne = true;
 			ZoomIn();
 			if (transform.position.z >= WorldZDepth + 10)
 			{
 				StarStreakMat.SetColor("_TintColor",Color(StarStreakMat.GetColor("_TintColor").r, StarStreakMat.GetColor("_TintColor").g, StarStreakMat.GetColor("_TintColor").b, 0));
-				sS.n = Application.loadedLevelName;
-				sS.SS();
 				Application.LoadLevel("levelselect"); 
 			}
 		}
-		else //moving to level
+		
+		//moving to a level
+		if (toLevel)
 		{
 			Camera.main.GetComponent(LevelNumberTypeEffect).SendMessage("TypeAway");
 			if (Camera.main.GetComponent(LevelNumberTypeEffect).NextLevelReady)
@@ -1044,6 +1037,17 @@ function Update ()
 				Application.LoadLevel(Level);
 				inGame = true;
 				fromLSelect = false;
+			}
+		}
+		
+		//moving to the main menu scene
+		if (toMainMenu)
+		{
+			isPlayOne = true;
+			ZoomIn();
+			if (transform.position.z >= WorldZDepth + 10)
+			{
+				Application.LoadLevel("MainMenu");
 			}
 		}
 	}
@@ -1075,11 +1079,9 @@ function FadeInKeys()
 	} while (KeyMat.color.a < 1);
 }
 
-//set the next level... hence the .
+//set the next level... hence the name.
 function SetNextLevel()
 {
-	sS.b = bTime;
-	sS.l = true;
 	isPlayOne = true;
 	nextLevel = true;	
 	halt = true; //stop all the controls
@@ -1340,60 +1342,141 @@ function shrinkCheck()
 	}
 }
 
-//Code for MainMenu
+//code for settings menu functionality
+function SettingsMenu()
+{
+	halt = true;
+	
+	if (PlatformPC)
+	{
+		//selecting level select objects
+		if(Input.GetMouseButtonDown(0))
+		{
+			if(Physics.Raycast(Camera.main.WorldToScreenPoint(Vector3(Input.mousePosition.x,Input.mousePosition.y,Camera.main.transform.position.z)), Camera.main.ScreenToWorldPoint(Vector3(Input.mousePosition.x, Input.mousePosition.y, WorldZDepth - Camera.main.transform.position.z)), objectInfo))
+			{
+				if (objectInfo.collider.name == "BackArrow")
+				{
+					tagPressed = true;
+					DepressLevelTag(objectInfo, false);
+				}	
+			}			
+		}
+		
+		//when letting go of the mouse then do stuff
+		if (Input.GetMouseButtonUp(0) && tagPressed)
+		{
+			StopAllCoroutines();
+			if (tagPressed)
+			{
+				UnpressLevelTag(objectInfo, false);
+			}
+			//reset tag pressed
+			tagPressed = false;
+			
+			//move back to main menu
+			nextLevel = true;
+			toMainMenu = true;
+		}		
+	}
+}
+
+//code for contact menu functionality
+function ContactMenu()
+{
+	halt = true;
+	
+	if (PlatformPC)
+	{
+		//selecting level select objects
+		if(Input.GetMouseButtonDown(0))
+		{
+			if(Physics.Raycast(Camera.main.WorldToScreenPoint(Vector3(Input.mousePosition.x,Input.mousePosition.y,Camera.main.transform.position.z)), Camera.main.ScreenToWorldPoint(Vector3(Input.mousePosition.x, Input.mousePosition.y, WorldZDepth - Camera.main.transform.position.z)), objectInfo))
+			{
+				if (objectInfo.collider.name == "BackArrow")
+				{
+					tagPressed = true;
+					DepressLevelTag(objectInfo, false);
+				}	
+			}			
+		}
+		
+		//when letting go of the mouse then do stuff
+		if (Input.GetMouseButtonUp(0) && tagPressed)
+		{
+			StopAllCoroutines();
+			if (tagPressed)
+			{
+				UnpressLevelTag(objectInfo, false);
+			}
+			//reset tag pressed
+			tagPressed = false;
+			
+			//move back to main menu
+			nextLevel = true;
+			toMainMenu = true;
+		}		
+	}
+}
+
+//Code for Main Menu functionality
 function MainMenu()
 {
-	//stop all other functions
 	halt = true;
-	if(Input.GetMouseButton(0))
+	
+	if (PlatformPC)
 	{
-		if(Physics.Raycast(Camera.main.WorldToScreenPoint(Vector3(Input.mousePosition.x,Input.mousePosition.y,Camera.main.transform.position.z)), Camera.main.ScreenToWorldPoint(Vector3(Input.mousePosition.x, Input.mousePosition.y, WorldZDepth - Camera.main.transform.position.z)), objectInfo))
+		//selecting level select objects
+		if(Input.GetMouseButtonDown(0))
 		{
-			if(objectInfo.collider.name == "start")
+			if(Physics.Raycast(Camera.main.WorldToScreenPoint(Vector3(Input.mousePosition.x,Input.mousePosition.y,Camera.main.transform.position.z)), Camera.main.ScreenToWorldPoint(Vector3(Input.mousePosition.x, Input.mousePosition.y, WorldZDepth - Camera.main.transform.position.z)), objectInfo))
 			{
-				//Level transition effect
-				while(!(transform.position.z >= WorldZDepth + 10))
+				if (objectInfo.collider.tag == "LevelTag")
 				{
-					ZoomIn();
-					yield WaitForSeconds(.01);
-				}
-				//Loads level and sets variables to proper states
-				if(transform.position.z >= WorldZDepth + 10)
-				{
-					Application.LoadLevel("intro to moving people - The The Impotence");
-					isMenu = false;
-					isLevelSelect = false;
-					isOptions = false;
-					inGame = true;
-				}
-			}
-			if(objectInfo.collider.name == "select")
-			{
-				while(!(transform.position.z >= WorldZDepth + 10))
-				{
-					ZoomIn();
-					yield WaitForSeconds(.01);
-				}
-				if(transform.position.z >= WorldZDepth + 10)
-				{
-					Application.LoadLevel("levelselect");
-					isLevelSelect = true;
-					isMenu = false;
-					inGame = false;
-				}
-			}	
-			//Not functional yet, but if we have an options menu and an exit planet as well these are here for that.
-			if(objectInfo.collider.name == "options")
-			{
-				Application.LoadLevel("options");
-				isMenu = false;
-				isLevelSelect = false;
-				isOptions = true;
-				inGame = false;
-			}	
-			if(objectInfo.collider.name == "exit")
-				Application.Quit();
+					tagPressed = true;
+					DepressLevelTag(objectInfo, false);
+				}	
+			}			
 		}
+		
+		//when letting go of the mouse then do stuff
+		if (Input.GetMouseButtonUp(0) && objectInfo.collider.tag == "LevelTag")
+		{
+			StopAllCoroutines();
+			if (tagPressed)
+			{
+				UnpressLevelTag(objectInfo, false);
+			}
+			//reset tag pressed
+			tagPressed = false; 
+			
+			//if clicked the start button
+			if (objectInfo.collider.name == "Start")
+			{
+				nextLevel = true;
+				toLevelSelect = true;
+				isLevelSelect = false;
+				inGame = true;
+			}
+			
+			//if clicked the Settings button
+			if (objectInfo.collider.name == "Settings")
+			{
+				nextLevel = true;
+				toSettings = true;
+				isLevelSelect = false;
+				inGame = false;
+			}
+			
+			//if clicked the Contact button
+			if (objectInfo.collider.name == "Contact")
+			{				
+				print("contact");
+				nextLevel = true;
+				toContact = true;
+				isLevelSelect = false;
+				inGame = false;
+			}
+		}		
 	}
 }
 
@@ -1409,6 +1492,7 @@ function LevelSelect()
 		{
 			if(Physics.Raycast(Camera.main.WorldToScreenPoint(Vector3(Input.mousePosition.x,Input.mousePosition.y,Camera.main.transform.position.z)), Camera.main.ScreenToWorldPoint(Vector3(Input.mousePosition.x, Input.mousePosition.y, WorldZDepth - Camera.main.transform.position.z)), objectInfo))
 			{
+				//if clicked a level tag
 				if (objectInfo.collider.tag == "LevelTag")
 				{
 					//print(objectInfo.collider.name);					
@@ -1417,7 +1501,7 @@ function LevelSelect()
 						if (!camera.main.GetComponent(KeyLockingController).Locked)
 						{
 							tagPressed = true;
-							DepressLevelTag(objectInfo);
+							DepressLevelTag(objectInfo, true);
 						}
 						else
 						{
@@ -1427,59 +1511,78 @@ function LevelSelect()
 					else
 					{
 						tagPressed = true;
-						DepressLevelTag(objectInfo);
+						DepressLevelTag(objectInfo, true);
 					}
+				}
+				
+				if (objectInfo.collider.name == "BackArrow")
+				{
+					tagPressed = true;
+					DepressLevelTag(objectInfo, false);
 				}
 			}
 		}
+		
 		//when letting go of the mouse then do stuff
-		if (Input.GetMouseButtonUp(0) && objectInfo.collider.tag == "LevelTag")
+		if (Input.GetMouseButtonUp(0) && tagPressed)
 		{
 			StopAllCoroutines();
 			if (tagPressed)
 			{
-				UnpressLevelTag(objectInfo);
+				UnpressLevelTag(objectInfo, true);
 			}
 			//reset tag pressed
 			tagPressed = false; 
-			
-			//check boss level
-			if (objectInfo.collider.transform.Find("Num").GetComponent(TextMesh).text == "BOSS LEVEL")
+			 
+			//back arrow
+			if (objectInfo.collider.name == "BackArrow")
 			{
-				if (!this.GetComponent(KeyLockingController).Locked)
+				nextLevel = true;
+				toMainMenu = true;
+			} 
+			
+			if (objectInfo.collider.tag == "LevelTag")
+			{
+				//check boss level
+				if (objectInfo.collider.transform.Find("Num").GetComponent(TextMesh).text == "BOSS LEVEL")
+				{
+					if (!this.GetComponent(KeyLockingController).Locked)
+					{
+						FadeOutKeys(); //fade out keys
+						
+						//initialize information for next go around
+						previousLevel = 20;
+						Level = objectInfo.collider.name;
+						PrevLevelLoc = LevelSelectMovementController.transform.position;
+						LevelOffset = Vector3.zero;
+						nextLevel = true;
+						toLevel = true;
+						isLevelSelect = false;
+						//isMenu = false;
+						inGame = true;
+						fromLSelect = true;
+					}
+					else
+					{
+						print("locked");
+					}
+				}
+				else //if not boss level then load like a normal level
 				{
 					FadeOutKeys(); //fade out keys
 					
-					//initialize information for next go around
-					previousLevel = 20;
+					//Level is set to the collider's name and then loaded. See "nextLevel" code in update function.
+					previousLevel = int.Parse(objectInfo.collider.transform.Find("Num").GetComponent(TextMesh).text);
 					Level = objectInfo.collider.name;
 					PrevLevelLoc = LevelSelectMovementController.transform.position;
 					LevelOffset = Vector3.zero;
 					nextLevel = true;
+					toLevel = true;
 					isLevelSelect = false;
-					isMenu = false;
+					//isMenu = false;
 					inGame = true;
 					fromLSelect = true;
 				}
-				else
-				{
-					print("locked");
-				}
-			}
-			else //if not boss level then load like a normal level
-			{
-				FadeOutKeys(); //fade out keys
-				
-				//Level is set to the collider's name and then loaded. See "nextLevel" code in update function.
-				previousLevel = int.Parse(objectInfo.collider.transform.Find("Num").GetComponent(TextMesh).text);
-				Level = objectInfo.collider.name;
-				PrevLevelLoc = LevelSelectMovementController.transform.position;
-				LevelOffset = Vector3.zero;
-				nextLevel = true;
-				isLevelSelect = false;
-				isMenu = false;
-				inGame = true;
-				fromLSelect = true;
 			}
 		}
 
@@ -1514,7 +1617,7 @@ function LevelSelect()
 					if(Physics.Raycast(Camera.main.WorldToScreenPoint(Vector3(Touch1StartPos.x,Touch1StartPos.y,Camera.main.transform.position.z)), Camera.main.ScreenToWorldPoint(Vector3(Touch1StartPos.x, Touch1StartPos.y, WorldZDepth - Camera.main.transform.position.z)), objectInfo))
 					{
 						FadeKick = false;
-						DepressLevelTag(objectInfo);
+						DepressLevelTag(objectInfo, true);
 						depressedTag = objectInfo;
 						iosTagDepress = true;
 					}
@@ -1531,7 +1634,7 @@ function LevelSelect()
 					if (iosTagDepress)
 					{
 						iosTagDepress = false;
-						UnpressLevelTag(depressedTag);
+						UnpressLevelTag(depressedTag, true);
 					}
 							
 					Touch1Move = true;
@@ -1574,7 +1677,7 @@ function LevelSelect()
 			{
 				iosTagDepress = false;
 				FadeKick = true;
-				UnpressLevelTag(depressedTag);
+				UnpressLevelTag(depressedTag, true);
 			}
 			
 			//check flicking
@@ -1642,8 +1745,9 @@ function LevelSelect()
 						previousLevel = int.Parse(objectInfo.collider.transform.Find("Num").GetComponent(TextMesh).text);
 						Level = objectInfo.collider.name;
 						nextLevel = true;
+						toLevel = true;
 						isLevelSelect = false;
-						isMenu = false;
+						//isMenu = false;
 						inGame = true;
 						fromLSelect = true;
 						
@@ -1652,7 +1756,7 @@ function LevelSelect()
 						{
 							Application.LoadLevel("mainmenu");
 							isLevelSelect = false;
-							isMenu = true;
+							//isMenu = true;
 						}
 						
 						Touch1Tap = false;
@@ -1674,6 +1778,15 @@ function LevelSelect()
 //gui
 function OnGUI()
 {
+	if (isSettingsMenu)
+	{
+		//world dragging inverting toggle
+		WorldDraggingInverted = GUI.Toggle(Rect(370,250,200,30), WorldDraggingInverted, "Invert View Dragging");
+		
+		//tilt speed
+		this.GetComponent(TiltControls).Speed = GUI.HorizontalSlider (Rect (370, 300, 100, 30), this.GetComponent(TiltControls).Speed, 20.0, 50.0);
+	}
+	
 	if (!isLevelSelect)
 	{
 		//back to level select button
@@ -1682,9 +1795,6 @@ function OnGUI()
 			peopleGoal = 0;
 		}
 	}
-	
-	//world dragging inverting toggle
-	WorldDraggingInverted = GUI.Toggle(Rect(10,50,200,30), WorldDraggingInverted, "Invert View Dragging");
 } 
 
 //zoom world out and pause everything. go to world view. PinchIn
@@ -1806,6 +1916,7 @@ function LevelWon()
 		levelWon = true;
 		
 		//wait a bit
+		toLevelSelect = true;
 		yield WaitForSeconds(1);
 		
 		//start level winning type
@@ -1867,36 +1978,61 @@ function MoveTo(time : float, target : Vector3)
 }
 
 //depress a level tag
-function DepressLevelTag(info : RaycastHit) 
+function DepressLevelTag(info : RaycastHit, isLevelTag : boolean) 
 {
 	if (info.collider.tag == "LevelTag")
 	{
-		FadeLevelTagSize(info.collider.transform.localScale.x);
-		info.collider.transform.Find("Num").renderer.material.color.a = 0.4; //number
-		info.collider.transform.Find("Name").renderer.material.color.a = 0.4; //name
-		//if (objectInfo.collider.transform.Find("Num").GetComponent(TextMesh).text == "BOSS LEVEL"
-	//	if(!info.collider.transform.Find("Num").GetComponent(TextMesh).text == "locked") //if not boss level then depress time
-	//	{
-			//info.collider.transform.Find("Time").renderer.material.color.a = 0.4; //time
-	//	}
-		info.collider.transform.Find("CompletedPlane").renderer.material.color.a = 0.4; //completed plane
+		FadeLevelTagSize(info.collider.transform.localScale.x); //fade tag size
+		
+		//here we do the things that pertain only to the level tags. yeah I know the method name is depress level tag, sue me
+		if (isLevelTag)
+		{
+			info.collider.transform.Find("Num").renderer.material.color.a = 0.4; //number
+			info.collider.transform.Find("Name").renderer.material.color.a = 0.4; //name
+			info.collider.transform.Find("CompletedPlane").renderer.material.color.a = 0.4; //completed plane
+		}
+		
+		//things to do when not depressing a level tag... aka when doing something in the main menu
+		if (!isLevelTag)
+		{
+			info.collider.transform.Find("text").renderer.material.color.a = 0.4;
+		}
+	}
+	
+	//back arrow
+	if (info.collider.name == "BackArrow")
+	{
+		FadeLevelTagSize(info.collider.transform.localScale.x); //fade tag size
+		//info.collider.renderer.material.color.a = 0.4; //fade opacity
 	}
 }
 
 //unpress a level tag. set it back to its normal state
-function UnpressLevelTag(info : RaycastHit) 
+function UnpressLevelTag(info : RaycastHit, isLevelTag : boolean) 
 {
 	if (info.collider.tag == "LevelTag")
-	{ 
-		info.collider.transform.localScale = Vector3(2.0, 2.0, 1.0); //tag scale
-		//info.collider.transform.localScale = Vector3(info.collider.transform.localScale.x + 0.15, info.collider.transform.localScale.y + 0.15, info.collider.transform.localScale.z + 0.15); //tag scale
-		info.collider.transform.Find("Num").renderer.material.color.a = 1; //number
-		info.collider.transform.Find("Name").renderer.material.color.a = 1; //name
-	//	if(!info.collider.name == "locked") //if not boss level then depress time
-	//	{
-			//info.collider.transform.Find("Time").renderer.material.color.a = 1; //time
-	//	}
-		info.collider.transform.Find("CompletedPlane").renderer.material.color.a = 1; //completed plane
+	{		
+		//here we do the things that pertain only to the level tags. yeah I know the method name is depress level tag, sue me
+		if (isLevelTag)
+		{
+			info.collider.transform.localScale = Vector3(2.0, 2.0, 1.0); //tag scale
+			info.collider.transform.Find("Num").renderer.material.color.a = 1; //number
+			info.collider.transform.Find("Name").renderer.material.color.a = 1; //name
+			info.collider.transform.Find("CompletedPlane").renderer.material.color.a = 1; //completed plane
+		}
+		
+		//things to do when not depressing a level tag... aka when doing something in the main menu
+		if (!isLevelTag)
+		{
+			info.collider.transform.localScale = Vector3(1.0, 1.0, 1.0); //tag scale
+			info.collider.transform.Find("text").renderer.material.color.a = 1;
+		}
+	}
+	
+	//back arrow
+	if (info.collider.name == "BackArrow")
+	{
+		info.collider.transform.localScale = Vector3(0.4, 0.4, 0.4); //tag scale
 	}
 }
 
