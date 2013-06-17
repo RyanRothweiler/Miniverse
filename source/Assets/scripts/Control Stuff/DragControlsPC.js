@@ -15,7 +15,7 @@ public static var previousLevel = 0; //the level num which the player was in las
 public var worldDist : float; //distance which the worlds must stay to the sun
 public var DragRate : float; //speed which player moves the world around
 public var CameraPositionSpeed : float; // the speed which the camera moves in during the level transitions
-public var CameraScaleSpeed : float; //the speed which the world scales up and down in the level transitions 
+public var CameraScaleSpeed : float; //the speed which the world scales up and down in the level transitions ƒ
 public var LevelSelectDragRate : float; //rate at which the level select tags are drug  
 public var TutorialTypeSpeed : float; //the speed at which the tutorials are typed
 
@@ -71,8 +71,6 @@ public var ZoomStreaks : GameObject; //the star streaks which show when zooming
 public var FailType : TextMesh; //the type which shows on level fail
 public var StarStreakMat : Material;
 public var KeyMat : Material; //the material used for the keys
-
-
 
 
 
@@ -295,13 +293,13 @@ function Start ()
 	}
 	else
 	{
-//		print("IOS");
-//		DragRate = 0.02;
-//		PlatformIOS = true;
-//		PlatformPC = false;
-		print("PC");
-		PlatformPC = true;
-		PlatformIOS = false;
+		print("IOS");
+		DragRate = 0.02;
+		PlatformIOS = true;
+		PlatformPC = false;
+//		print("PC");
+//		PlatformPC = true;
+//		PlatformIOS = false;
 	}
 	
 	//ios initializations
@@ -997,6 +995,7 @@ function Update ()
 		//moving to the settings scene
 		if (toSettings)
 		{
+			toLevelSelect = false;
 			isPlayOne = true;
 			ZoomIn();
 			if (transform.position.z >= WorldZDepth + 10)
@@ -1005,8 +1004,10 @@ function Update ()
 			}
 		}
 		
+		//moving to the contact scene
 		if (toContact)
 		{
+			toLevelSelect = false;
 			isPlayOne = true;
 			ZoomIn();
 			if (transform.position.z >= WorldZDepth + 10)
@@ -1378,6 +1379,61 @@ function SettingsMenu()
 			toMainMenu = true;
 		}		
 	}
+	
+	//if ios platform
+	if (PlatformIOS)
+	{
+		//reset
+		Touching1 = false;
+		
+		//get touches
+		for (var touch : Touch in Input.touches)
+		{
+			Touching1 = true;
+			Touch1EndPos = touch.position;
+			
+			//check the first touch
+			if (touch.fingerId == 0)
+			{
+				Touch1Tap = true;	
+				
+				//get start pos
+				if (Touch1Start)
+				{
+					Touch1StartPos = touch.position;
+					Touch1Start = false;
+					Touch1Move = false;
+					
+					//check for tag depression
+					if(Physics.Raycast(Camera.main.WorldToScreenPoint(Vector3(Touch1StartPos.x,Touch1StartPos.y,Camera.main.transform.position.z)), Camera.main.ScreenToWorldPoint(Vector3(Touch1StartPos.x, Touch1StartPos.y, WorldZDepth - Camera.main.transform.position.z)), objectInfo))
+					{
+						DepressLevelTag(objectInfo, false);
+						depressedTag = objectInfo;
+						iosTagDepress = true;
+					}
+					
+				}		
+			}
+		}
+		
+		//if not touching
+		if (!Touching1)
+		{
+			//reset
+			Touch1Start = true;
+			
+			//unpress level tag
+			if (iosTagDepress)
+			{
+				iosTagDepress = false;
+				UnpressLevelTag(depressedTag, false);
+				
+				//move back to main menu
+				nextLevel = true;
+				toMainMenu = true;
+			}
+		}
+	}
 }
 
 //code for contact menu functionality
@@ -1416,6 +1472,61 @@ function ContactMenu()
 			toMainMenu = true;
 		}		
 	}
+	
+	//if ios platform
+	if (PlatformIOS)
+	{
+		//reset
+		Touching1 = false;
+		
+		//get touches
+		for (var touch : Touch in Input.touches)
+		{
+			Touching1 = true;
+			Touch1EndPos = touch.position;
+			
+			//check the first touch
+			if (touch.fingerId == 0)
+			{
+				Touch1Tap = true;	
+				
+				//get start pos
+				if (Touch1Start)
+				{
+					Touch1StartPos = touch.position;
+					Touch1Start = false;
+					Touch1Move = false;
+					
+					//check for tag depression
+					if(Physics.Raycast(Camera.main.WorldToScreenPoint(Vector3(Touch1StartPos.x,Touch1StartPos.y,Camera.main.transform.position.z)), Camera.main.ScreenToWorldPoint(Vector3(Touch1StartPos.x, Touch1StartPos.y, WorldZDepth - Camera.main.transform.position.z)), objectInfo))
+					{
+						DepressLevelTag(objectInfo, false);
+						depressedTag = objectInfo;
+						iosTagDepress = true;
+					}
+					
+				}		
+			}
+		}
+		
+		//if not touching
+		if (!Touching1)
+		{
+			//reset
+			Touch1Start = true;
+			
+			//unpress level tag
+			if (iosTagDepress)
+			{
+				iosTagDepress = false;
+				UnpressLevelTag(depressedTag, false);
+				
+				//move back to main menu
+				nextLevel = true;
+				toMainMenu = true;
+			}
+		}
+	}
 }
 
 //Code for Main Menu functionality
@@ -1423,6 +1534,7 @@ function MainMenu()
 {
 	halt = true;
 	
+	//pc controls
 	if (PlatformPC)
 	{
 		//selecting level select objects
@@ -1477,6 +1589,98 @@ function MainMenu()
 				inGame = false;
 			}
 		}		
+	}
+	
+	//if ios platform
+	if (PlatformIOS)
+	{
+		//reset
+		Touching1 = false;
+		
+		//get touches
+		for (var touch : Touch in Input.touches)
+		{
+			Touching1 = true;
+			Touch1EndPos = touch.position;
+			
+			//check the first touch
+			if (touch.fingerId == 0)
+			{
+				Touch1Tap = true;	
+				
+				//get start pos
+				if (Touch1Start)
+				{
+					Touch1StartPos = touch.position;
+					Touch1Start = false;
+					Touch1Move = false;
+					
+					//check for tag depression
+					if(Physics.Raycast(Camera.main.WorldToScreenPoint(Vector3(Touch1StartPos.x,Touch1StartPos.y,Camera.main.transform.position.z)), Camera.main.ScreenToWorldPoint(Vector3(Touch1StartPos.x, Touch1StartPos.y, WorldZDepth - Camera.main.transform.position.z)), objectInfo))
+					{
+						DepressLevelTag(objectInfo, false);
+						depressedTag = objectInfo;
+						iosTagDepress = true;
+					}
+					
+				}		
+			}
+		}
+		
+		//if not touching
+		if (!Touching1)
+		{
+			//reset
+			Touch1Start = true;
+			
+			//unpress level tag
+			if (iosTagDepress)
+			{
+				iosTagDepress = false;
+				UnpressLevelTag(depressedTag, false);
+			}
+			
+			//check a tap			
+			if(Physics.Raycast(Camera.main.WorldToScreenPoint(Vector3(Touch1StartPos.x,Touch1StartPos.y,Camera.main.transform.position.z)), Camera.main.ScreenToWorldPoint(Vector3(Touch1StartPos.x, Touch1StartPos.y, WorldZDepth - Camera.main.transform.position.z)), objectInfo))
+			{
+				//if clicked the start button
+				if (objectInfo.collider.name == "Start")
+				{
+					toLevelSelect = true;
+					nextLevel = true;
+					isLevelSelect = false;
+					inGame = true;
+				}
+				
+				//if clicked the Settings button
+				if (objectInfo.collider.name == "Settings")
+				{
+					toSettings = true;
+					nextLevel = true;
+					isLevelSelect = false;
+					inGame = true;
+				}
+				
+				//if clicked the Contact button
+				if (objectInfo.collider.name == "Contact")
+				{				
+					toContact = true;
+					nextLevel = true;					
+					isLevelSelect = false;
+					inGame = true;
+				}
+				
+				Touch1Tap = false;
+				Touch1StartPos = Vector2(0,0);
+				Touch1EndPos = Vector2(1000,1000);
+			}
+			else
+			{
+				Touch1StartPos = Vector2(0,0);
+				Touch1EndPos = Vector2(1000,1000);
+				Touch1Tap = false;
+			}
+		}
 	}
 }
 
@@ -1674,10 +1878,19 @@ function LevelSelect()
 			
 			//unpress level tag
 			if (iosTagDepress)
-			{
+			{				
+				UnpressLevelTag(depressedTag, true);
+				
+				//check back arrow before anything else
+				if (objectInfo.collider.name == "BackArrow")
+				{
+					nextLevel = true;
+					toMainMenu = true;
+					return;
+				}
+				
 				iosTagDepress = false;
 				FadeKick = true;
-				UnpressLevelTag(depressedTag, true);
 			}
 			
 			//check flicking
@@ -1781,10 +1994,10 @@ function OnGUI()
 	if (isSettingsMenu)
 	{
 		//world dragging inverting toggle
-		WorldDraggingInverted = GUI.Toggle(Rect(370,250,200,30), WorldDraggingInverted, "Invert View Dragging");
+		WorldDraggingInverted = GUI.Toggle(Rect(280,250,200,30), WorldDraggingInverted, "Invert View Dragging");
 		
 		//tilt speed
-		this.GetComponent(TiltControls).Speed = GUI.HorizontalSlider (Rect (370, 300, 100, 30), this.GetComponent(TiltControls).Speed, 20.0, 50.0);
+		this.GetComponent(TiltControls).Speed = GUI.HorizontalSlider (Rect (280, 300, 100, 30), this.GetComponent(TiltControls).Speed, 20.0, 50.0);
 	}
 	
 	if (!isLevelSelect)
