@@ -128,7 +128,6 @@ function MeshAdd ()
 
 			//start chain
 			tempChain.members.Add(circle);
-			circle.collides = true;
 			//find the next link
 			for (var circle2 : MeshCircle in circles)
 			{
@@ -159,13 +158,13 @@ function MeshAdd ()
 	}
 	
 	//disable circles
-//	for (var circle : MeshCircle in	 circles)
-//	{
-//		if (circle.collides)
-//		{
-//			Destroy(circle.mesh.gameObject);
-//		}
-//	}
+	for (var circle : MeshCircle in	 circles)
+	{
+		if (circle.collides)
+		{
+			Destroy(circle.mesh.gameObject);
+		}
+	}
 }
 
 //assigns the next member in the chain
@@ -191,7 +190,6 @@ function SetNextMember(chain : CircleChain, currentCircle : MeshCircle) : boolea
 			}
 		}
 	}
-	currentCircle.collides = true;
 	currentCircle.endCircle = false;
 	return true;
 }

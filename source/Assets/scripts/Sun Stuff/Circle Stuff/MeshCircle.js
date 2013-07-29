@@ -1,3 +1,5 @@
+//there is some code in here with hard coded numbers. They rely on the whole scene to be a specific scale. So if you change the scale and sunradii addition isn't working, check the hard coded numbers here in FindEndPoints
+
 class MeshCircle
 {
 	//variables
@@ -48,8 +50,10 @@ class MeshCircle
 	function MeshCircle(radius : float, center : Vector3, mesh : MeshFilter)
 	{
 		this.circle = Circ(center, radius);
+		this.circle.center.z = 15;
 		this.mesh = mesh;
 		this.center = center;
+		this.center.z = 15;
 		this.radius = radius;
 		this.endCircle = false;
 		
@@ -73,7 +77,7 @@ class MeshCircle
 	
 	//set the endpoint variables using the end point circles
 	function SetEndPoints(ObjToCheck : GameObject, otherCircle : MeshCircle, DeathSphere : GameObject)
-	{			
+	{
 		//get endpoints
 		for (i = 0; i < 4; i++)
 		{
@@ -83,7 +87,7 @@ class MeshCircle
 			for (j = 0; j < ObjToCheck.GetComponent(MeshFilter).mesh.triangles.Length; j++)
 			{
 				var nextDist = Vector3.Distance(ObjToCheck.transform.TransformPoint(ObjToCheck.GetComponent(MeshFilter).mesh.vertices[ObjToCheck.GetComponent(MeshFilter).mesh.triangles[j]]), otherCircle.center);
-				if ((nextDist < smallestDist) && (Vector3.Distance(ObjToCheck.transform.TransformPoint(ObjToCheck.GetComponent(MeshFilter).mesh.vertices[ObjToCheck.GetComponent(MeshFilter).mesh.triangles[j]]), center) < (circle.radius + 0.001)))
+				if ((nextDist < smallestDist) && (Vector3.Distance(ObjToCheck.transform.TransformPoint(ObjToCheck.GetComponent(MeshFilter).mesh.vertices[ObjToCheck.GetComponent(MeshFilter).mesh.triangles[j]]), center) < (circle.radius + 0.1)))
 				{
 					if (endCircle)
 					{
