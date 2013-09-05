@@ -18,7 +18,7 @@
 	<DebugType>full</DebugType>
 	<Optimize>false</Optimize>
 	<OutputPath>Temp\bin\Debug\</OutputPath>
-	<DefineConstants>DEBUG;TRACE;UNITY_3_5_2;UNITY_3_5;UNITY_EDITOR;ENABLE_PROFILER;UNITY_STANDALONE_WIN;ENABLE_GENERICS;ENABLE_DUCK_TYPING;ENABLE_TERRAIN;ENABLE_MOVIES;ENABLE_WEBCAM;ENABLE_MICROPHONE;ENABLE_NETWORK;ENABLE_CLOTH;ENABLE_WWW;ENABLE_SUBSTANCE</DefineConstants>
+	<DefineConstants>DEBUG;TRACE;UNITY_3_5_6;UNITY_3_5;UNITY_EDITOR;ENABLE_PROFILER;UNITY_WEBPLAYER;ENABLE_GENERICS;ENABLE_DUCK_TYPING;ENABLE_TERRAIN;ENABLE_MOVIES;ENABLE_WEBCAM;ENABLE_MICROPHONE;ENABLE_NETWORK;ENABLE_CLOTH;ENABLE_WWW;ENABLE_SUBSTANCE</DefineConstants>
 	<ErrorReport>prompt</ErrorReport>
 	<WarningLevel>4</WarningLevel>
 	<NoWarn>0169</NoWarn>
@@ -44,17 +44,19 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Smart Water Island Demo\Editor\UpdateTreeColors.js" />
-     <None Include="Assets\Smart Water Island Demo\Standard Assets\Blob-Shadow\ShadowProjection.shader" />
-     <None Include="Assets\Smart Water Island Demo\seaFoamCoast\foamShaderGlow.shader" />
-     <None Include="Assets\Smart Water Island Demo\Scripts\Particle Alpha Blend goodfog.shader" />
-     <None Include="Assets\Smart Water Island Demo\seaFoamCoast\ReflFix.shader" />
-     <None Include="Assets\Smart Water Island Demo\Water\FX-UnderwaterSurface.shader" />
-     <None Include="Assets\Smart Water Island Demo\Water\FX-IslandWaterFull.shader" />
-     <None Include="Assets\Smart Water Island Demo\seaFoamCoast\foamShader.shader" />
-     <None Include="Assets\Smart Water Island Demo\Standard Assets\Water\Sources\FX-Water NonReflect.shader" />
-     <None Include="Assets\Smart Water Island Demo\Birds\Heron\Vegetation-TwoPass.shader" />
-     <None Include="Assets\Smart Water Island Demo\Water\FX-IslandWaterSimple.shader" />
+     <Compile Include="Assets\editor\CameraCustomControls.js" />
+     <None Include="Assets\shaders\RampRim.shader" />
+     <None Include="Assets\shaders\CustFontShader.shader" />
+     <None Include="Assets\shaders\RampRimSpecBump.shader" />
+     <None Include="Assets\shaders\CustTextMesh.shader" />
+     <None Include="Assets\shaders\Mask.shader" />
+     <None Include="Assets\shaders\PlanetRingIndicator.shader" />
+     <None Include="Assets\shaders\RampRimBump.shader" />
+     <None Include="Assets\shaders\shader.shader" />
+     <None Include="Assets\shaders\CustSelfIlluminSpec.shader" />
+     <None Include="Assets\shaders\RampRimSpec.shader" />
+     <None Include="Assets\lProgress.xml" />
+     <None Include="Assets\shaders\RampRim_Teleport.shader" />
  <Reference Include="Assembly-UnityScript">
  <HintPath>Library\ScriptAssemblies\Assembly-UnityScript.dll</HintPath>
  </Reference>

@@ -44,30 +44,24 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Orthello\Standard Assets\Editor\OTPrefabBreaker.cs" />
-     <None Include="Assets\Orthello\Examples\0 - Simple Examples\TextSprites\lorem.txt" />
-     <None Include="Assets\shaders\PC\RampRim.shader" />
-     <None Include="Assets\shaders\PC\CustFontShader.shader" />
-     <None Include="Assets\Orthello\Examples\0 - Simple Examples\TextSprites\Atlases\russian.txt" />
-     <None Include="Assets\shaders\PC\RampRimSpecBump.shader" />
-     <None Include="Assets\Orthello\Examples\4 - Follow Target View\-orthello-config.xml" />
-     <None Include="Assets\Orthello\-Read-Me.txt" />
-     <None Include="Assets\shaders\PC\PlanetRingIndicator.shader" />
-     <None Include="Assets\shaders\PC\RampRimBump.shader" />
-     <None Include="Assets\shaders\PC\shader.shader" />
-     <None Include="Assets\Orthello\Examples\0 - Simple Examples\TextSprites\orthello-font-30.txt" />
-     <None Include="Assets\shaders\PC\CustSelfIlluminSpec.shader" />
-     <None Include="Assets\Orthello\-Update-Upgrade info.txt" />
-     <None Include="Assets\Orthello\Examples\0 - Simple Examples\TextSprites\Atlases\img.xml" />
-     <None Include="Assets\shaders\PC\RampRimSpec.shader" />
-     <None Include="Assets\Orthello\Examples\0 - Simple Examples\TextSprites\Atlases\glyph.xml" />
+     <Compile Include="Assets\Editor\OLDE\CalculatorWindow.cs" />
+     <Compile Include="Assets\Editor\OLDE\CreateNewCSG.cs" />
+     <Compile Include="Assets\Editor\OLDE\Inspectors\ActiveBrushInspector.cs" />
+     <Compile Include="Assets\Editor\OLDE\Inspectors\BrushInspector.cs" />
+     <Compile Include="Assets\Editor\OLDE\Inspectors\CSGModelInspector.cs" />
+     <Compile Include="Assets\Editor\Utilities\UtilityShortcuts.cs" />
+     <None Include="Assets\shaders\RampRim.shader" />
+     <None Include="Assets\shaders\CustFontShader.shader" />
+     <None Include="Assets\shaders\RampRimSpecBump.shader" />
+     <None Include="Assets\shaders\CustTextMesh.shader" />
+     <None Include="Assets\shaders\Mask.shader" />
+     <None Include="Assets\shaders\PlanetRingIndicator.shader" />
+     <None Include="Assets\shaders\RampRimBump.shader" />
+     <None Include="Assets\shaders\shader.shader" />
+     <None Include="Assets\shaders\CustSelfIlluminSpec.shader" />
+     <None Include="Assets\shaders\RampRimSpec.shader" />
      <None Include="Assets\lProgress.xml" />
-     <None Include="Assets\Orthello\Examples\0 - Simple Examples\TextSprites\Atlases\chalk.xml" />
-     <None Include="Assets\Orthello\Examples\0 - Simple Examples\Multi Resolution Art\atlas.xml" />
-     <None Include="Assets\Orthello\Standard Assets\OT\_Base\TintedAlpha.shader" />
-     <None Include="Assets\Orthello\Examples\0 - Simple Examples\RotateTowards\-read-me.txt" />
-     <None Include="Assets\Orthello\Examples\0 - Simple Examples\Persistance\-read-me.txt" />
-     <None Include="Assets\Orthello\Examples\0 - Simple Examples\TextSprites\lorem-rus-utf8.txt" />
+     <None Include="Assets\shaders\RampRim_Teleport.shader" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Assembly-CSharp.csproj">

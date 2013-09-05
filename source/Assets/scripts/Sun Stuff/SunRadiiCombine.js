@@ -1,8 +1,7 @@
 #pragma strict
 
-//create 
-//@script RequireComponent(MeshFilter)
-//@script RequireComponent(MeshRenderer)
+//note, the camera must be at (0,0,0) for this to work. Why? idk.
+
 
 //public vars
 public var SunRadiiHolder : GameObject;
@@ -51,7 +50,6 @@ function Start ()
 	masterNors = transform.GetChild(0).GetComponent(MeshFilter).mesh.normals.Clone();
 	masterVerts = transform.GetChild(0).GetComponent(MeshFilter).mesh.vertices.Clone();
 	
-	//combine the meshes
 	if (combine)
 	{
 		MeshAdd();

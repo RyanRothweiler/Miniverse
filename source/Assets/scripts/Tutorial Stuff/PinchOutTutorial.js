@@ -33,7 +33,7 @@ function Update ()
 	//showing round one
 	if (dragControls.canMoveToPlay && ShowVirgin && !RoundTwo && RoundOne)
 	{
-		Type("DOUBLE TAP HERE");
+		Type("DOUBLE TAP");
 		AnywhereTut.SendMessage("Type","(HERE)");
 		AnywhereTut.transform.position = Vector3(this.transform.position.x - 0.9, this.transform.position.y - 0.28, this.transform.position.z);
 		AnywhereTut.transform.localScale  = Vector3(0.01,0.01,0.01);
@@ -61,6 +61,7 @@ function Update ()
 		RoundOne = false;
 		StopAllCoroutines();
 		Type(" ");
+		AnywhereTut.SendMessage("Type"," ");
 	}
 }
 
@@ -108,7 +109,7 @@ function RoundOneHiding()
 	transform.localPosition = RoundOneTwoPos;
 	AnywhereTut.SendMessage("Type","(ANYWHERE)");
 	AnywhereTut.transform.localPosition = Vector3(-2.63, -0.58, 25.66);
-	AnywhereTut.transform.localScale  = Vector3(0.02,0.02,0.02);
+	AnywhereTut.transform.localScale = Vector3(0.02,0.02,0.02);
 	yield WaitForSeconds(0.2);
 	yield StartCoroutine(Type("NOW DOUBLE TAP AGAIN"));
 }
@@ -122,8 +123,9 @@ function RoundTwoShowing()
 	
 	//hide middle round
 	yield StartCoroutine(Type(" "));
-	AnywhereTut.SendMessage("Type"," ");
+	AnywhereTut.SendMessage("Type","(HERE)");
+	AnywhereTut.transform.localPosition = Vector3(3.18, 2.69, 25.66);
 	yield WaitForSeconds(0.2);
 	transform.localPosition = SecondTutPos;
-	Type("DOUBLE TAP HERE");
+	Type("DOUBLE TAP");
 }

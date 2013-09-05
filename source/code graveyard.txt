@@ -12,3 +12,43 @@
 			//info.collider.transform.Find("Time").renderer.material.color.a = 1; //time
 	//	}
 		
+
+
+
+
+
+
+
+
+
+
+
+
+#pragma strict
+
+//holds information about circles used for the boolean sun radii shenanigans
+
+//public vars
+public var radii : float; //the radius of the circle
+public var center : Vector3; //the center point of the circle
+public var mesh : MeshFilter; //the mesh of the circle
+public var intersectors : MeshCircle[]; //holds the other circles this one intersects
+public var intersectPoint1 : Vector3; //one point of intersection
+public var intersectPoint2 : Vector3; //another point of intersection
+
+function Start () 
+{
+
+}
+
+function Update () 
+{
+
+}
+
+function MeshCircle (radii : float, center : Vector3, mesh : MeshFilter)
+{
+	this.radii = radii;
+	this.center = center;
+	this.mesh = mesh;
+}

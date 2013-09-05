@@ -334,9 +334,9 @@ function Start ()
 	//pc initializations
 	if (PlatformPC)
 	{
-//		CanScrollZoom = true;
-//		CanViewDrag = true;
-		//WorldDraggingInverted = true;
+		CanScrollZoom = true;
+		CanViewDrag = true;
+		WorldDraggingInverted = true;
 	}
 	
 }
