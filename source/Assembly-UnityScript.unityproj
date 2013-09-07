@@ -56,6 +56,7 @@
      <Compile Include="Assets\scripts\Debris Stuff\BackgroundAsteroidController.js" />
      <Compile Include="Assets\scripts\Debris Stuff\MetalScrapsDebris.js" />
      <Compile Include="Assets\scripts\Debris Stuff\SateliteDebris.js" />
+     <Compile Include="Assets\scripts\Debris Stuff\ShipDebris.js" />
      <Compile Include="Assets\scripts\Effects\ExplosionParticleEffect.js" />
      <Compile Include="Assets\scripts\Effects\HumanTeleportEffectController.js" />
      <Compile Include="Assets\scripts\Effects\TransitionStars.js" />
