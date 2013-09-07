@@ -1,5 +1,11 @@
 #pragma strict
 
+//just some notes
+//
+//
+//the camera MUST be at 0,0,0 at the start of the level
+//objects cannot have a z larger than 100
+
 //public vars
 public var objectInfo : RaycastHit;
 public var selectedWorld : RaycastHit;
@@ -83,6 +89,7 @@ private var rotationSpeed = 10.0;
 private var lerpSpeed = 1.0;
 private var f = 0.0;
 private var startTime : float;
+private var levelFinishCamZoomMultiplier : float; //jesus what a long var name. basically it is incremented each cycle so the camera zooms exponentially at the end of a level.
 
 //ints
 private var camZStopPos = -11;
@@ -212,6 +219,7 @@ function Start ()
 	LevelOffset = Vector3.zero;
 	Timer = GetComponent(LevelTimer); //get the level timer 
 	TutorialTypeSpeed = 0.03;
+	levelFinishCamZoomMultiplier = 0;
 	
 	if (!LevelSelect)
 	{
@@ -1044,7 +1052,7 @@ function Update ()
 		{
 			isPlayOne = true;
 			ZoomIn();
-			if (transform.position.z >= WorldZDepth + 10)
+			if (transform.position.z >= WorldZDepth + 100)
 			{
 				StarStreakMat.SetColor("_TintColor",Color(StarStreakMat.GetColor("_TintColor").r, StarStreakMat.GetColor("_TintColor").g, StarStreakMat.GetColor("_TintColor").b, 0));
 				Application.LoadLevel("levelselect"); 
@@ -1330,7 +1338,8 @@ function ZoomIn ()
 	//TransitionStars.transform.position.z -= 2;
 	
 	//move the camera in
-	transform.position.z += CameraPositionSpeed * Time.deltaTime;
+	levelFinishCamZoomMultiplier += 0.2;
+	transform.position.z += CameraPositionSpeed * Time.deltaTime * levelFinishCamZoomMultiplier;
 }
 
 //Sun Shrinking Code
